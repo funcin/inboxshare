@@ -7,6 +7,9 @@
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
 
+  // 分享链接用的自定义域名；custom_domain 让 Cloudflare 在部署时自动建 DNS 记录和证书
+  "routes": [{ "pattern": "mail.funcin.de", "custom_domain": true }],
+
   // 把 .html 当字符串 import（页面模板）
   "rules": [{ "type": "Text", "globs": ["**/*.html"], "fallthrough": false }],
 
@@ -35,7 +38,7 @@
     // 邮件保留天数（超过即删，含 R2 附件）
     "RETENTION_DAYS": "30",
     // 生成分享链接时用的站点地址，留空则用请求自身的 origin
-    "PUBLIC_BASE_URL": "",
+    "PUBLIC_BASE_URL": "https://mail.funcin.de",
     // 可选：收到的邮件同时转发一份到这个地址（必须是 Email Routing 里已验证的目标地址）
     "FORWARD_TO": ""
   },
