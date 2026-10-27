@@ -40,7 +40,7 @@ pnpm test:email                       # 投递一封样例邮件到 share@exampl
 3. 接 Workers Builds（已做）：Dashboard → Workers & Pages → Create → Import a repository → 选 `funcin/emailshare`，
    分支 `main`，Build command 留空，Deploy command `npx wrangler deploy`。Worker 名随仓库名为 `emailshare`。
    之后 `git push` 即部署，不要手动 deploy。
-4. （可选）给 Worker 绑自定义域名，并把 `wrangler.jsonc` 的 `PUBLIC_BASE_URL` 设成它，分享链接才会用该域名。
+4. 自定义域名（已做：`mail.funcin.de`）：`wrangler.jsonc` 的 `routes` 用 `custom_domain: true`，部署时 Cloudflare 自动建 DNS 和证书；`PUBLIC_BASE_URL` 设成同一域名，管理页生成的链接才会用它。
 5. Email Routing：Dashboard → 你的域名 → Email → Email Routing
    - 启用 Email Routing（按提示添加 MX / SPF 记录；域名在 Cloudflare 托管则一键添加）
    - Routing rules → Create address → 填要共享的地址（如 `share@yourdomain.com`）→ Action 选 **Send to a Worker** → 选 `emailshare`
