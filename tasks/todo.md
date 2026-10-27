@@ -12,10 +12,12 @@
 - [x] 本地验证：真实投递 sample.eml、API 全链路、浏览器渲染
 - [x] 线上资源：D1、R2、远程迁移、ADMIN_TOKEN secret（2026-10-27 完成）
 - [x] 推 GitHub（funcin/emailshare）→ Workers Builds 接仓库 → 首次构建失败（未锁 pnpm/Node 版本）→ 锁定后成功，线上 https://emailshare.funcin.workers.dev 管理接口验证通过（2026-10-27）
-- [ ] Email Routing 把共享地址指向 Worker `emailshare` → 发测试邮件 → /admin 建链接 → 无痕窗口验证 /s/<key>
+- [x] Email Routing 规则 hi@funcin.de → Worker `emailshare` 已启用；测试邮件（funcin@icloud.com → hi@funcin.de）落库；管理接口建链接（24h 窗口、7 天有效）；浏览器真实渲染 /s/<key> 列表 + 详情通过（2026-10-27）
 
 ## 进度
-2026-10-27 本地全链路通过；线上 Worker 部署成功，等 Email Routing 接入。
+2026-10-27 线上全链路跑通：Email Routing → Worker → D1 → /s/<key>。首条链接 key 存本地 dev/first-link.json（不进 git）。
+
+未做（可选）：Worker 自定义域名 + `PUBLIC_BASE_URL`；`/api/s/*` 的 Rate Limiting 规则；`FORWARD_TO` 目前为空，hi@funcin.de 的邮件只进共享收件箱不转发。
 
 ## 审查
 - 页面只读，HTML 在浏览器端消毒 + sandbox iframe + srcdoc CSP；附件强制下载。
