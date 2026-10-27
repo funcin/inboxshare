@@ -28,7 +28,8 @@ function withUrl(link: ShareLinkRow, base: string) {
 
 export function registerAdminRoutes(app: App): void {
   app.get('/admin', (c) => {
-    const locale = resolveLocale(c.env.LOCALE);
+    const selected = c.req.query('lang');
+    const locale = selected === 'en' || selected === 'zh-CN' ? resolveLocale(selected) : resolveLocale(c.env.LOCALE);
     return c.html(renderPage(adminPage, locale, ADMIN_DICTS[locale]));
   });
 
