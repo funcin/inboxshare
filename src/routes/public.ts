@@ -1,6 +1,8 @@
 import { Hono } from 'hono';
 import { getLink, getMessage, listMessages } from '../db';
 import { attachmentKey } from '../email';
+import { renderPage, resolveLocale } from '../i18n';
+import { retentionDays } from '../cleanup';
 import sharePage from '../pages/share.html';
 import type { AttachmentMeta, Env, ShareLinkRow } from '../types';
 
@@ -37,7 +39,9 @@ function safeContentType(mimeType: string): string {
 }
 
 export function registerPublicRoutes(app: App): void {
-  app.get('/s/:key', (c) => c.html(sharePage));
+  app.get('/s/:key', (c) =>
+    c.html(renderPage(sharePage, resolveLocale(c.env.LOCALE), { days: String(retentionDays(c.env)) })),
+  );
 
   app.get('/api/s/:key/messages', async (c) => {
     const link = await resolveLink(c.env.DB, c.req.param('key'));
@@ -55,6 +59,7 @@ export function registerPublicRoutes(app: App): void {
         subject: r.subject,
         receivedAt: r.received_at,
         snippet: r.snippet,
+        code: r.code,
         attachmentCount: parseAttachments(r.attachments_json).length,
       })),
     });
@@ -83,6 +88,7 @@ export function registerPublicRoutes(app: App): void {
       from: { address: msg.from_address, name: msg.from_name },
       subject: msg.subject,
       receivedAt: msg.received_at,
+      code: msg.code,
       html,
       text: msg.text_body,
       attachments,

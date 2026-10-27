@@ -1,4 +1,5 @@
 import PostalMime from 'postal-mime';
+import { detectCode } from './code';
 import { insertMessage } from './db';
 import type { AttachmentMeta, Env } from './types';
 import { newMessageId, normalizeMailbox } from './util';
@@ -70,6 +71,7 @@ export async function handleEmail(message: ForwardableEmailMessage, env: Env, ct
     html_r2_key: htmlR2Key,
     size: raw.byteLength,
     attachments_json: JSON.stringify(metas),
+    code: detectCode(parsed.subject ?? null, text),
   });
 
   // 可选：同时转发一份到真实邮箱（目标必须在 Email Routing 里验证过）

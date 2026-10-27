@@ -40,7 +40,9 @@
     // 生成分享链接时用的站点地址，留空则用请求自身的 origin
     "PUBLIC_BASE_URL": "https://mail.funcin.de",
     // 可选：收到的邮件同时转发一份到这个地址（必须是 Email Routing 里已验证的目标地址）
-    "FORWARD_TO": ""
+    "FORWARD_TO": "",
+    // 分享页语言：zh-CN | en
+    "LOCALE": "zh-CN"
   },
 
   "observability": { "enabled": true }

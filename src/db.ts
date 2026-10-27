@@ -4,8 +4,8 @@ export async function insertMessage(db: D1Database, row: MessageRow): Promise<vo
   await db
     .prepare(
       `INSERT INTO messages (id, mailbox, from_address, from_name, subject, received_at,
-         text_body, html_body, html_r2_key, size, attachments_json)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)`,
+         text_body, html_body, html_r2_key, size, attachments_json, code)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)`,
     )
     .bind(
       row.id,
@@ -19,6 +19,7 @@ export async function insertMessage(db: D1Database, row: MessageRow): Promise<vo
       row.html_r2_key,
       row.size,
       row.attachments_json,
+      row.code,
     )
     .run();
 }
@@ -32,7 +33,7 @@ export async function listMessages(
   const { results } = await db
     .prepare(
       `SELECT id, from_address, from_name, subject, received_at,
-              substr(text_body, 1, 200) AS snippet, attachments_json
+              substr(text_body, 1, 200) AS snippet, attachments_json, code
        FROM messages
        WHERE mailbox = ?1 AND received_at >= ?2
        ORDER BY received_at DESC

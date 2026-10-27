@@ -6,6 +6,8 @@ export interface Env {
   RETENTION_DAYS?: string;
   PUBLIC_BASE_URL?: string;
   FORWARD_TO?: string;
+  /** 分享页语言：zh-CN | en（部署时在 wrangler.jsonc 里定） */
+  LOCALE?: string;
 }
 
 export interface AttachmentMeta {
@@ -29,6 +31,8 @@ export interface MessageRow {
   html_r2_key: string | null;
   size: number;
   attachments_json: string;
+  /** 入库时识别出的验证码，没有则 null */
+  code: string | null;
 }
 
 export interface MessageListRow {
@@ -39,6 +43,7 @@ export interface MessageListRow {
   received_at: number;
   snippet: string | null;
   attachments_json: string;
+  code: string | null;
 }
 
 export type LinkStatus = 'active' | 'revoked' | 'expired';

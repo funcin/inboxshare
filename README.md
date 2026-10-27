@@ -55,6 +55,7 @@ pnpm test:email                       # 投递一封样例邮件到 share@exampl
 | `RETENTION_DAYS` | vars | 邮件保留天数，默认 30 |
 | `PUBLIC_BASE_URL` | vars | 分享链接前缀，留空用请求 origin |
 | `FORWARD_TO` | vars | 可选，收到后整体转发到此地址（须在 Email Routing 验证） |
+| `LOCALE` | vars | 分享页语言：`zh-CN`（默认）或 `en`，部署时定 |
 
 时间窗口可选：`0`（不限，仍受保留期约束）、`30`、`60`、`360`、`1440`、`10080` 分钟，相对“现在”滚动计算。
 
@@ -67,6 +68,10 @@ pnpm test:email                       # 投递一封样例邮件到 share@exampl
   `default-src 'none'; img-src data:` CSP，远程追踪像素不会加载。
 - 附件强制下载；可被浏览器直接执行的类型改成 `application/octet-stream`。
 - 管理令牌常量时间比较；令牌只存于浏览器 sessionStorage。
+
+## 验证码识别
+
+入库时从主题和纯文本正文里识别验证码（`src/code.ts`），存到 `messages.code`。规则保守：邮件里必须出现“验证码 / code / OTP”一类词，才把 4～8 位数字当验证码；年份、订单号不会误判。分享页把识别到的验证码做成列表标签和详情顶部的大号复制卡片。
 
 ## 已知限制
 
