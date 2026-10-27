@@ -2,16 +2,18 @@ import { Hono } from 'hono';
 import { runCleanup } from './cleanup';
 import { handleEmail } from './email';
 import { registerAdminRoutes } from './routes/admin';
+import { LANDING_PATHS, registerLandingRoutes } from './routes/landing';
 import { registerPublicRoutes } from './routes/public';
 import type { Env } from './types';
 
 const app = new Hono<{ Bindings: Env }>();
 
-// 全站都是私密内容：禁止索引、不带 referrer、不缓存
+// 除首页外都是私密内容：禁止索引、不带 referrer、不缓存
 app.use('*', async (c, next) => {
   await next();
-  c.header('X-Robots-Tag', 'noindex, nofollow');
-  c.header('Referrer-Policy', 'no-referrer');
+  const isLanding = LANDING_PATHS.has(c.req.path);
+  if (!isLanding) c.header('X-Robots-Tag', 'noindex, nofollow');
+  c.header('Referrer-Policy', isLanding ? 'strict-origin-when-cross-origin' : 'no-referrer');
   c.header('X-Content-Type-Options', 'nosniff');
   c.header('X-Frame-Options', 'DENY');
   if (!c.res.headers.has('Cache-Control')) c.header('Cache-Control', 'no-store');
@@ -24,9 +26,7 @@ app.use('*', async (c, next) => {
   }
 });
 
-app.get('/', (c) => c.text('shared-inbox: use /s/<key> or /admin', 200));
-app.get('/robots.txt', (c) => c.text('User-agent: *\nDisallow: /\n'));
-
+registerLandingRoutes(app);
 registerPublicRoutes(app);
 registerAdminRoutes(app);
 

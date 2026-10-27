@@ -25,6 +25,8 @@
 
 2026-10-28 管理页也跟随 LOCALE 中英双语（字典在 src/i18n.ts 的 ADMIN_DICTS）。
 
+2026-10-28 首页上线：`/` 按 LOCALE、`/en` `/zh` 固定语言，hreflang + canonical + sitemap，robots 只放行首页；文案按 SEO 结论（主词 share email verification codes）。加了 MIT LICENSE。
+
 未做（可选）：`/api/s/*` 的 Rate Limiting 规则；`FORWARD_TO` 目前为空，hi@funcin.de 的邮件只进共享收件箱不转发。
 
 ## 审查

@@ -88,6 +88,10 @@ Dashboard → 你的域名 → Email → Email Routing：
 
 `custom_domain: true` 会在部署时自动创建 DNS 记录和证书。注意配置了 `routes` 后 wrangler 默认关闭 `workers.dev` 入口。
 
+## 首页
+
+`/` 是产品落地页（按 `LOCALE` 渲染），`/en` 和 `/zh` 固定语言并互相标 hreflang。只有这几个路径允许索引和缓存；`/s/*`、`/admin`、`/api/*` 始终 noindex + no-store。首页文案在 `src/landing-i18n.ts`。
+
 ## 配置
 
 | 项 | 位置 | 说明 |

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="{{htmlLang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{metaTitle}}</title>
+<meta name="description" content="{{metaDesc}}">
+<link rel="canonical" href="{{canonical}}">
+<link rel="alternate" hreflang="en" href="{{baseUrl}}/en">
+<link rel="alternate" hreflang="zh-CN" href="{{baseUrl}}/zh">
+<link rel="alternate" hreflang="x-default" href="{{baseUrl}}/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{metaTitle}}">
+<meta property="og:description" content="{{metaDesc}}">
+<meta property="og:url" content="{{canonical}}">
+<style>
+  :root { color-scheme: light dark;
+    --bg: #F3F5F8; --card: #FFFFFF; --fg: #16181D; --muted: #5B6572; --line: #E3E7EC;
+    --accent: #2F5BEA; --accent-ink: #1E3FBF; --accent-tint: #DCE6FF; --accent-line: #C9D6FF; --accent-soft: #F5F8FF; --ok: #1F8A4C; --ok-bg: #E6F4EC; --ok-ink: #1F6B45; }
+  @media (prefers-color-scheme: dark) { :root {
+    --bg: #0F1419; --card: #171D26; --fg: #E5E7EB; --muted: #9CA3AF; --line: #2A3340;
+    --accent: #6D8CFF; --accent-ink: #A9BBFF; --accent-tint: #223060; --accent-line: #35477E; --accent-soft: #161D30; --ok: #34D399; --ok-bg: #0F2A22; --ok-ink: #7EE2B8; } }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--fg); -webkit-text-size-adjust: 100%;
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "PingFang SC", "Noto Sans SC", sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent); }
+  .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; padding-left: max(24px, env(safe-area-inset-left)); padding-right: max(24px, env(safe-area-inset-right)); }
+  header { background: var(--card); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; }
+  .nav { display: flex; align-items: center; gap: 18px; min-height: 64px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: -0.01em; color: var(--fg); text-decoration: none; }
+  .mark { width: 32px; height: 32px; border-radius: 8px; background: var(--accent); display: flex; align-items: center; justify-content: center; }
+  .nav nav { margin-left: auto; display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; }
+  .nav nav a { color: var(--muted); text-decoration: none; }
+  .nav nav a:hover { color: var(--fg); }
+  .switch { border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; color: var(--fg) !important; }
+
+  .hero { padding-top: 72px; padding-bottom: 56px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 48px; align-items: center; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--ok-ink); background: var(--ok-bg); border-radius: 999px; padding: 5px 12px; }
+  .eyebrow::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: var(--ok); }
+  h1 { margin: 18px 0 14px; font-size: clamp(32px, 5vw, 48px); line-height: 1.12; letter-spacing: -0.02em; }
+  .sub { margin: 0; font-size: 18px; color: var(--muted); max-width: 560px; }
+  .ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 20px; border-radius: 10px; font-weight: 600; text-decoration: none; font-size: 15px; }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.primary:hover { filter: brightness(0.95); }
+  .btn.ghost { background: var(--card); color: var(--fg); border: 1px solid var(--line); }
+  .btn.ghost:hover { border-color: var(--accent); }
+  .note { margin-top: 16px; font-size: 13px; color: var(--muted); }
+
+  .demo { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px -30px rgba(22, 24, 29, 0.35); }
+  .demo .row { display: flex; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .avatar { flex: 0 0 36px; width: 36px; height: 36px; border-radius: 999px; background: var(--accent-tint); color: var(--accent-ink); display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .demo .meta { flex: 1; min-width: 0; }
+  .demo .r1 { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+  .demo .r1 b { font-weight: 600; }
+  .demo .r1 span { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .demo .subj { font-size: 14px; margin-top: 2px; }
+  .codebox { margin: 16px; padding: 18px; border: 1px solid var(--accent-line); background: var(--accent-soft); border-radius: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .codebox .label { font-size: 12px; font-weight: 600; color: var(--accent-ink); letter-spacing: 0.04em; }
+  .codebox .code { font-size: 40px; font-weight: 600; letter-spacing: 0.2em; line-height: 1.1; text-align: center; padding: 4px 0; }
+  .codebox .btn { justify-content: center; }
+
+  section { padding: 56px 0; }
+  section.alt { background: var(--card); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  h2 { margin: 0 0 28px; font-size: clamp(24px, 3.2vw, 32px); letter-spacing: -0.02em; line-height: 1.2; }
+  .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; counter-reset: step; }
+  .step { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  section.alt .step, section.alt .card { background: var(--bg); }
+  .step::before { counter-increment: step; content: counter(step); display: inline-flex; width: 30px; height: 30px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; align-items: center; justify-content: center; margin-bottom: 12px; }
+  h3 { margin: 0 0 8px; font-size: 17px; }
+  p { margin: 0; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+  .card .icon { width: 36px; height: 36px; border-radius: 9px; background: var(--accent-soft); border: 1px solid var(--accent-line); color: var(--accent-ink); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  ul.sec { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; }
+  ul.sec li { display: flex; gap: 10px; color: var(--muted); }
+  ul.sec svg { flex: 0 0 auto; margin-top: 4px; color: var(--ok); }
+  .faq details { border-top: 1px solid var(--line); padding: 14px 0; }
+  .faq details:last-child { border-bottom: 1px solid var(--line); }
+  .faq summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; color: var(--muted); }
+  .faq details[open] summary::after { content: "–"; }
+  .faq p { margin-top: 10px; }
+  footer { padding-top: 32px; padding-bottom: 48px; font-size: 13px; color: var(--muted); display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+  footer a { color: var(--muted); }
+
+  @media (max-width: 800px) {
+    .hero { grid-template-columns: minmax(0, 1fr); padding-top: 40px; padding-bottom: 36px; gap: 28px; }
+    .steps, .grid, .grid2, ul.sec { grid-template-columns: minmax(0, 1fr); }
+    section { padding: 40px 0; }
+    .nav nav { gap: 14px; }
+    .nav nav a.hide-m { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="/"><span class="mark" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 7l9 6 9-6"></path></svg></span>{{brand}}</a>
+    <nav>
+      <a class="hide-m" href="#features">{{navFeatures}}</a>
+      <a class="hide-m" href="#how">{{navHow}}</a>
+      <a class="hide-m" href="#security">{{navSecurity}}</a>
+      <a class="hide-m" href="#faq">{{navFaq}}</a>
+      <a href="{{githubUrl}}" rel="noopener">{{navGithub}}</a>
+      <a class="switch" href="{{switchHref}}" hreflang="{{switchLang}}">{{switchLabel}}</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div>
+      <span class="eyebrow">{{eyebrow}}</span>
+      <h1>{{h1}}</h1>
+      <p class="sub">{{sub}}</p>
+      <div class="ctas">
+        <a class="btn primary" href="{{deployUrl}}" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 17.6A5 5 0 0 0 18 8h-1.3A7 7 0 1 0 5 15.3"></path><path d="M12 12v9"></path><path d="M8 17l4 4 4-4"></path></svg>{{ctaDeploy}}</a>
+        <a class="btn ghost" href="{{githubUrl}}" rel="noopener">{{ctaGithub}}</a>
+      </div>
+      <p class="note">{{heroNote}}</p>
+    </div>
+    <div class="demo" aria-hidden="true">
+      <div class="row">
+        <div class="avatar">D</div>
+        <div class="meta">
+          <div class="r1"><b>{{demoFrom}}</b><span>{{demoTime}}</span></div>
+          <div class="subj">{{demoSubject}}</div>
+        </div>
+      </div>
+      <div class="codebox">
+        <span class="label">{{demoCodeLabel}}</span>
+        <span class="code mono">{{demoCode}}</span>
+        <span class="btn primary">{{demoCopy}}</span>
+      </div>
+    </div>
+  </div>
+
+  <section id="how" class="alt">
+    <div class="wrap">
+      <h2>{{howTitle}}</h2>
+      <div class="steps">
+        <div class="step"><h3>{{how1Title}}</h3><p>{{how1Body}}</p></div>
+        <div class="step"><h3>{{how2Title}}</h3><p>{{how2Body}}</p></div>
+        <div class="step"><h3>{{how3Title}}</h3><p>{{how3Body}}</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="wrap">
+      <h2>{{featuresTitle}}</h2>
+      <div class="grid">
+        <div class="card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="10" rx="2"></rect><path d="M7 12h.01M11 12h.01M15 12h.01"></path></svg></div><h3>{{f1Title}}</h3><p>{{f1Body}}</p></div>
+        <div class="card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></div><h3>{{f2Title}}</h3><p>{{f2Body}}</p></div>
+        <div class="card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"></path><path d="M9.9 5.1A10.9 10.9 0 0 1 12 5c5 0 9 4 10 7a11.6 11.6 0 0 1-3.2 4.3"></path><path d="M6.6 6.6A11.7 11.7 0 0 0 2 12c1 3 5 7 10 7a10.5 10.5 0 0 0 4.3-.9"></path></svg></div><h3>{{f3Title}}</h3><p>{{f3Body}}</p></div>
+        <div class="card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div><h3>{{f4Title}}</h3><p>{{f4Body}}</p></div>
+        <div class="card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 7l9 6 9-6"></path></svg></div><h3>{{f5Title}}</h3><p>{{f5Body}}</p></div>
+        <div class="card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 17.6A5 5 0 0 0 18 8h-1.3A7 7 0 1 0 5 15.3"></path></svg></div><h3>{{f6Title}}</h3><p>{{f6Body}}</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="uses" class="alt">
+    <div class="wrap">
+      <h2>{{usesTitle}}</h2>
+      <div class="grid2">
+        <div class="card"><h3>{{u1Title}}</h3><p>{{u1Body}}</p></div>
+        <div class="card"><h3>{{u2Title}}</h3><p>{{u2Body}}</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="security">
+    <div class="wrap">
+      <h2>{{securityTitle}}</h2>
+      <ul class="sec">
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg><span>{{s1}}</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg><span>{{s2}}</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg><span>{{s3}}</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"></path></svg><span>{{s4}}</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="faq" class="alt">
+    <div class="wrap faq">
+      <h2>{{faqTitle}}</h2>
+      <details><summary>{{q1}}</summary><p>{{a1}}</p></details>
+      <details><summary>{{q2}}</summary><p>{{a2}}</p></details>
+      <details><summary>{{q3}}</summary><p>{{a3}}</p></details>
+      <details><summary>{{q4}}</summary><p>{{a4}}</p></details>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <span>{{brand}}</span>
+  <span>·</span>
+  <a href="{{githubUrl}}/blob/main/LICENSE" rel="noopener">{{footerLicense}}</a>
+  <span>·</span>
+  <a href="{{githubUrl}}" rel="noopener">{{footerSource}}</a>
+</footer>
+</body>
+</html>
