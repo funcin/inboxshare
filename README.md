@@ -1,4 +1,4 @@
-# shared-inbox
+# emailshare（shared-inbox）
 
 自有域名邮箱的只读共享收件箱，纯 Cloudflare 栈：**Email Routing → Email Worker → D1 + R2 → `/s/<key>` 只读页面**。
 
@@ -27,23 +27,23 @@ pnpm test:email                       # 投递一封样例邮件到 share@exampl
 ## 部署（首次）
 
 > 2026-10-27 已完成：D1 `shared-inbox`（id 见 wrangler.jsonc）、R2 `shared-inbox-attachments`、远程迁移、
-> `ADMIN_TOKEN` secret（同时创建了空 Worker `shared-inbox`）。令牌明文在本地 `dev/admin-token.txt`（不进 git）。
+> `ADMIN_TOKEN` secret。线上 Worker 名为 `emailshare`（与 GitHub 仓库 funcin/emailshare 同名，由 Workers Builds 创建）。令牌明文在本地 `dev/admin-token.txt`（不进 git）。
 
 1. 建资源并回填配置（已做）：
    ```bash
    pnpm wrangler d1 create shared-inbox          # 把输出的 database_id 填进 wrangler.jsonc
    pnpm wrangler r2 bucket create shared-inbox-attachments
    pnpm db:migrate:remote
-   pnpm wrangler secret put ADMIN_TOKEN --name shared-inbox   # 一串长随机字符串
+   pnpm wrangler secret put ADMIN_TOKEN --name emailshare     # 一串长随机字符串
    ```
 2. 代码推到 GitHub（私有仓库即可）。
-3. 接 Workers Builds：Dashboard → Workers & Pages → 点开已存在的 `shared-inbox` → Settings → Build →
-   Connect（连接 GitHub 仓库，分支 `main`，Build command 留空，Deploy command `npx wrangler deploy`）。
+3. 接 Workers Builds（已做）：Dashboard → Workers & Pages → Create → Import a repository → 选 `funcin/emailshare`，
+   分支 `main`，Build command 留空，Deploy command `npx wrangler deploy`。Worker 名随仓库名为 `emailshare`。
    之后 `git push` 即部署，不要手动 deploy。
 4. （可选）给 Worker 绑自定义域名，并把 `wrangler.jsonc` 的 `PUBLIC_BASE_URL` 设成它，分享链接才会用该域名。
 5. Email Routing：Dashboard → 你的域名 → Email → Email Routing
    - 启用 Email Routing（按提示添加 MX / SPF 记录；域名在 Cloudflare 托管则一键添加）
-   - Routing rules → Create address → 填要共享的地址（如 `share@yourdomain.com`）→ Action 选 **Send to a Worker** → 选 `shared-inbox`
+   - Routing rules → Create address → 填要共享的地址（如 `share@yourdomain.com`）→ Action 选 **Send to a Worker** → 选 `emailshare`
    - 想同时收到真实邮件：在 Destination addresses 验证一个目标邮箱，再把它填进 `vars.FORWARD_TO`
 6. 发一封测试邮件到该地址 → `/admin` 里应出现这个邮箱 → 建链接 → 分享。
 

@@ -1,4 +1,4 @@
-# shared-inbox · 项目规范
+# emailshare（shared-inbox）· 项目规范
 
 ## 是什么
 
@@ -20,7 +20,7 @@ Worker 解析后把元数据/正文存 D1、附件存 R2，管理员生成 `/s/<
 
 - 业务数据：D1 `shared-inbox`（表 `messages`、`share_links`，schema 在 `migrations/`）。
 - 附件与超大正文：R2 `shared-inbox-attachments`（键 `att/<msgId>/<n>`、`body/<msgId>.html`）。
-- 配置：`wrangler.jsonc` 唯一来源；密钥走 secret。
+- 配置：`wrangler.jsonc` 唯一来源；密钥走 secret。线上 Worker 名 `emailshare`，GitHub 仓库 funcin/emailshare。
 - 邮件最长保留 `RETENTION_DAYS`（默认 30），每天 03:17 UTC 的 cron 清理 D1 + R2。
 
 ## 部署方式

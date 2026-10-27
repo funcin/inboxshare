@@ -2,7 +2,7 @@
   // 只读共享收件箱：Cloudflare Email Routing → 本 Worker 收信入库 → /s/<key> 只读页面
   // 密钥不要写在这里：ADMIN_TOKEN 用 `wrangler secret put ADMIN_TOKEN`（本地用 .dev.vars）
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "shared-inbox",
+  "name": "emailshare",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
