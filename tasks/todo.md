@@ -45,4 +45,4 @@
 - 待办（站长）：注册 inboxshare.app → 把域名接入 Cloudflare → 建 GitHub 组织 `inboxshare`。
 - 2026-10-28 开源前整改完成：敏感邮件分类与隔离（迁移 0003，链接 show_sensitive）、Deploy 按钮 + fork 即部署 Actions + `pnpm run deploy`、wrangler.jsonc 顶层通用化（作者实例移到 env.production）、README/CLAUDE.md 换品牌 InboxShare。代码推到 `funcin/inboxshare`（站长已建）。
 - 2026-10-28 站长把 Worker 从 `emailshare` 改名为 `inboxshare`（密钥、D1、R2、mail.funcin.de 均保留），wrangler.jsonc 的 name 同步改为 `inboxshare`。
-- 2026-10-28 Workers Builds 已从 `funcin/inboxshare` 成功部署（绑定、密钥、域名、数据均保留）；旧仓库 `funcin/emailshare` 已归档，本地 old 远端已删。域名 inboxshare.app 注册后再加路由。
+- 2026-10-28 Workers Builds 已从 `funcin/inboxshare` 成功部署（绑定、密钥、域名、数据均保留）；旧仓库 `funcin/emailshare` 已归档，本地 old 远端已删。域名 inboxshare.app 已注册并接入 Cloudflare（2026-10-28），已加为正式入口，PUBLIC_BASE_URL 切换；mail.funcin.de 保留给旧链接。

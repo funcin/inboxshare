@@ -40,7 +40,11 @@
     // 作者实例（Worker `inboxshare`）：Workers Builds 的部署命令是 `pnpm run deploy:production`
     "production": {
       "name": "inboxshare",
-      "routes": [{ "pattern": "mail.funcin.de", "custom_domain": true }],
+      // inboxshare.app 是正式入口；mail.funcin.de 保留，已发出的旧链接继续可用
+      "routes": [
+        { "pattern": "inboxshare.app", "custom_domain": true },
+        { "pattern": "mail.funcin.de", "custom_domain": true }
+      ],
       "d1_databases": [
         {
           "binding": "DB",
@@ -53,7 +57,7 @@
       "triggers": { "crons": ["17 3 * * *"] },
       "vars": {
         "RETENTION_DAYS": "30",
-        "PUBLIC_BASE_URL": "https://mail.funcin.de",
+        "PUBLIC_BASE_URL": "https://inboxshare.app",
         "FORWARD_TO": "",
         "LOCALE": "zh-CN"
       }

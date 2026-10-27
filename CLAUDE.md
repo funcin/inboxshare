@@ -7,7 +7,7 @@ Worker 解析、识别验证码、分类后把元数据/正文存 D1、附件存
 链接设定的滚动时间窗口内（30 分钟 … 7 天 / 不限）只读查看邮件与下载附件。典型用途：把主邮箱里的验证码邮件
 转发到这里，让家人或同事自助看验证码。
 
-品牌名 **InboxShare**（只出现在显示层）；GitHub 仓库 `funcin/inboxshare`；计划域名 `inboxshare.app`。
+品牌名 **InboxShare**（只出现在显示层）；GitHub 仓库 `funcin/inboxshare`；正式域名 `inboxshare.app`（mail.funcin.de 作为旧入口保留）。
 参考原型：dingyue.xzys.me 的「共享收件箱」（Renewlet 二开 + LanQin-Email）；同栈开源邻居：TooonyChen/AuthInbox。
 
 ## 红线（不做什么）
@@ -27,7 +27,7 @@ Worker 解析、识别验证码、分类后把元数据/正文存 D1、附件存
 - 业务数据：D1（表 `messages`、`share_links`，schema 在 `migrations/`，新字段只加迁移文件不改旧文件）。
 - 附件与超大正文：R2（键 `att/<msgId>/<n>`、`body/<msgId>.html`）。
 - 配置：`wrangler.jsonc` 唯一来源。**顶层是通用模板**（无资源 id、无路由，fork 即可用）；
-  `env.production` 是作者实例（Worker `inboxshare`、D1 `shared-inbox`、域名 `mail.funcin.de`）。
+  `env.production` 是作者实例（Worker `inboxshare`、D1 `shared-inbox`、域名 `inboxshare.app` + 旧入口 `mail.funcin.de`）。
   作者实例的 Workers Builds 部署命令是 `pnpm run deploy:production`（先远程迁移再部署）。
 - 邮件最长保留 `RETENTION_DAYS`（默认 30），每天 03:17 UTC 的 cron 清理 D1 + R2。
 
