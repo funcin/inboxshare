@@ -31,7 +31,7 @@
     // 可选：收到的邮件同时转发一份到这个地址（必须是 Email Routing 里已验证的目标地址）
     "FORWARD_TO": "",
     // 分享页与管理页语言：zh-CN | en
-    "LOCALE": "zh-CN"
+    "LOCALE": "en"
   },
 
   "observability": { "enabled": true },
@@ -59,7 +59,7 @@
         "RETENTION_DAYS": "30",
         "PUBLIC_BASE_URL": "https://inboxshare.app",
         "FORWARD_TO": "",
-        "LOCALE": "zh-CN"
+        "LOCALE": "en"
       }
     }
   }
