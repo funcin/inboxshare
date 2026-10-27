@@ -40,7 +40,8 @@ function safeContentType(mimeType: string): string {
 
 export function registerPublicRoutes(app: App): void {
   app.get('/s/:key', (c) => {
-    const locale = resolveLocale(c.env.LOCALE);
+    const selected = c.req.query('lang');
+    const locale = selected === 'en' || selected === 'zh-CN' ? resolveLocale(selected) : resolveLocale(c.env.LOCALE);
     return c.html(renderPage(sharePage, locale, DICTS[locale], { days: String(retentionDays(c.env)) }));
   });
 
