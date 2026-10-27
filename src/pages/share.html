@@ -245,15 +245,29 @@
   }
 
   var mobile = window.matchMedia('(max-width: 800px)');
+  var detailPushed = false;
   function openDetailPane() {
     $('layout').classList.add('detail-open');
     if (mobile.matches) {
       window.scrollTo(0, 0);
       // 手机上把详情记成一条历史，系统返回手势/返回键回到列表而不是离开页面
-      if (!(history.state && history.state.detail)) history.pushState({ detail: true }, '');
+      if (!detailPushed) { history.pushState({ detail: true }, ''); detailPushed = true; }
     }
   }
-  function closeDetailPane() { $('layout').classList.remove('detail-open'); }
+  function closeDetailPane() { detailPushed = false; $('layout').classList.remove('detail-open'); }
+
+  // 正文 iframe 每次都重新创建：已有 iframe 再次导航会往浏览器历史里加记录，
+  // 导致“返回”先回退 iframe 而不是回到列表（正文也会因此变空）
+  function mountFrame(doc) {
+    var old = $('frame');
+    var f = document.createElement('iframe');
+    f.id = 'frame';
+    f.setAttribute('sandbox', 'allow-popups allow-popups-to-escape-sandbox');
+    f.setAttribute('referrerpolicy', 'no-referrer');
+    f.title = old.title;
+    f.srcdoc = doc;
+    old.parentNode.replaceChild(f, old);
+  }
 
   function showDenied() {
     $('denied').classList.remove('hidden');
@@ -320,8 +334,7 @@
         $('codebox').classList.remove('hidden');
       }
       if (m.html) {
-        $('frame').srcdoc = sanitize(m.html);
-        $('frame').classList.remove('hidden');
+        mountFrame(sanitize(m.html));
       } else {
         $('text').textContent = m.text || T.emptyBody;
         $('text').classList.remove('hidden');
@@ -345,7 +358,7 @@
   }
 
   $('back').addEventListener('click', function () {
-    if (history.state && history.state.detail) history.back(); else closeDetailPane();
+    if (detailPushed) { detailPushed = false; history.back(); } else closeDetailPane();
   });
   window.addEventListener('popstate', closeDetailPane);
   $('refresh').addEventListener('click', load);

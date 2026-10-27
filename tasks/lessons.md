@@ -11,3 +11,9 @@
 **原因**: 本地用 pnpm 11 生成锁文件并在 pnpm-workspace.yaml 用了 `allowBuilds`，没告诉 CI 用哪个 pnpm/Node，CI 默认版本对不上。
 **教训**: 新建 Cloudflare 项目时骨架就要带 `packageManager` + `.node-version`（和 freesongmaker 一致），不要等 CI 报错。
 **规则**: 初始化任何走 Workers Builds 的项目，第一个提交必须包含 `packageManager` 与 `.node-version`。
+
+## 2026-10-28 - 手机端“返回列表”点了没反应
+**问题**: 分享页手机视图看完第二封 HTML 邮件后，点“返回列表”第一次没反应，正文还变成空白，第二次才回到列表。
+**原因**: 详情区复用同一个 iframe，反复设置 srcdoc；已存在的 iframe 再次导航会往浏览器联合历史里加一条记录。`history.back()` 先回退的是 iframe 那条（正文随之变空），页面的 popstate 不触发。
+**教训**: 用 iframe 展示会变化的内容时，每次都新建 iframe 再替换，新 iframe 的首次加载不进历史；“是否推过历史”用自己的变量记，不要依赖 history.state。
+**规则**: 任何靠 pushState/popstate 做页内导航的页面，内部不得复用 iframe 做二次导航。
