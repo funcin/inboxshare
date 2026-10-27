@@ -1,141 +1,217 @@
 # InboxShare
 
-**Share email verification codes through one read-only link.**
-Forward verification emails from any mailbox to an address on your own domain; InboxShare turns that address into a read-only web page you can hand to family or teammates. No app, no accounts for viewers, runs free on Cloudflare Workers.
+**Share verification emails and login codes through one read-only link.**
 
-把任意邮箱里的验证码邮件转发到你自己域名下的一个地址，InboxShare 把这个地址变成一个只读网页链接，发给家人或同事即可自助查看验证码。访客不装 App、不注册账号；整套跑在 Cloudflare Workers 免费额度上。
+InboxShare is an open-source, self-hosted **shared verification inbox**. Forward selected emails from Gmail, Outlook, iCloud Mail, or another existing mailbox to an address on your own domain. Authorized family members and teammates can then open a permanent web link to read messages and copy email verification codes without asking an administrator to forward each message.
+
+**No shared email password. No viewer registration. No app to install.**
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/funcin/inboxshare)
 
+[中文简介](#中文简介)
+
+## The problem
+
+A family member or teammate needs an email login code. It lands in an administrator's inbox, so everyone has to wait while that person finds and forwards it. InboxShare makes access self-service.
+
+1. Set up a filter in your existing mailbox to forward **only selected verification emails** to `share@yourdomain.com`.
+2. Cloudflare Email Routing delivers those messages to InboxShare.
+3. Create a revocable, read-only link in the admin dashboard.
+4. Share the link with authorized viewers. They can view recent emails and copy codes themselves.
+
+Typical use cases include household subscription management where the provider's terms allow sharing, team email-based login verification, and read-only access to operational notifications.
+
+> InboxShare does not create disposable mailboxes, generate TOTP codes, bypass verification, or circumvent account-sharing restrictions. It displays emails received through forwarding.
+
+## Features
+
+| Feature | Description |
+| --- | --- |
+| Read-only shared inbox | Fixed `/s/<key>` link. Viewers can read, but cannot send, reply to, or delete email. |
+| Email OTP detection | Detects likely 4–8 digit email verification codes and offers a prominent copyable code. |
+| Time-window controls | Show messages from the last 30 minutes, 1 hour, 6 hours, 1 day, 7 days, or all retained messages. |
+| Expiry and revocation | Set link expiration and revoke shared access. |
+| Sensitive email filtering | Password resets, billing, and account-security messages are hidden from viewers by default. |
+| Mobile-friendly UI | Responsive message list and details, refreshed every 30 seconds. |
+| English and Chinese | Set `LOCALE` to `en` or `zh-CN`. |
+| Cloudflare-based hosting | Uses Email Routing, Workers, D1, R2, and scheduled cleanup. |
+
+## Architecture
+
+```text
+Existing Gmail / Outlook / other mailbox
+          │ selective auto-forwarding
+          ▼
+  share@yourdomain.com
+          │
+          ▼
+ Cloudflare Email Routing
+          │
+          ▼
+ InboxShare Email Worker
+    ├── Parse + classify mail and detect codes
+    ├── D1: messages + share links
+    ├── R2: attachments + large bodies
+    ├── /admin: create/revoke links (ADMIN_TOKEN)
+    └── /s/<key>: read-only viewer
+          │
+          ▼
+ Authorized household or team members
 ```
-sender ──SMTP──▶ Cloudflare Email Routing ──▶ Worker.email()
-                                                │  postal-mime 解析 → 识别验证码 → 分类
-                                                ├─▶ D1  messages / share_links
-                                                └─▶ R2  附件、超大正文
-访客 ──GET /s/<key>──▶ Worker.fetch() ──▶ 校验链接 → 只返回窗口内、非敏感的邮件（只读）
-管理员 ──Bearer ADMIN_TOKEN──▶ /admin 与 /api/admin/*  建链 / 撤销 / 看邮箱
-cron 每日 ──▶ 删除超过 RETENTION_DAYS 的邮件与附件
-```
 
-## 功能
+**Important distinction:** The forwarding destination (`share@yourdomain.com`) receives email. The share URL (`https://your-host/s/<key>`) is a web page for viewing authorized messages. They are not interchangeable.
 
-- **一个链接看验证码**：链接是 32 位随机 key，可设过期时间，可随时撤销；访客只能看，不能回复、转发、删除。
-- **滚动时间窗口**：每条链接只显示最近 30 分钟 / 1 小时 / 6 小时 / 1 天 / 7 天的邮件，或不限（受保留期约束）。
-- **验证码识别**：入库时从主题和正文识别 4～8 位验证码，列表里做成标签，详情顶部做成大号复制卡片。规则保守，年份、订单号不会误判。
-- **敏感邮件默认隔离**：密码重置、账单、账户安全变更三类邮件默认不出现在分享页，管理员建链接时可显式打开。
-- **中英文**：`LOCALE` 设 `zh-CN` 或 `en`，分享页和管理页一起切换。
-- **手机友好**：列表与详情全屏切换，系统返回手势回到列表。
+## Deployment
 
-## 工作方式
+### Prerequisites
 
-1. 用户在自己的主邮箱（Gmail、Outlook、iCloud 等）建一条过滤规则：只把特定发件人或含"验证码"的邮件转发到 `share@yourdomain.com`。
-2. Cloudflare Email Routing 把这个地址的来信交给 Worker，Worker 解析、识别验证码、分类后存入 D1/R2。
-3. 管理员在 `/admin` 为这个地址生成分享链接，发给需要看验证码的人。
-4. 访客打开 `/s/<key>`，看到时间窗口内的邮件和验证码；页面每 30 秒自动刷新。
+- Cloudflare account and a domain managed by Cloudflare
+- Node.js 22 or later and pnpm for CLI deployment
+- A long, randomly generated `ADMIN_TOKEN` (at least 16 characters)
 
-## 部署
+### Option 1: Deploy to Cloudflare
 
-三种方式任选，都不需要服务器。前提：有一个托管在 Cloudflare 的域名。
+Use the [Deploy to Cloudflare button](https://deploy.workers.cloudflare.com/?url=https://github.com/funcin/inboxshare) and follow the setup flow.
 
-### 方式一：Deploy to Cloudflare 按钮
-
-点上面的按钮，Cloudflare 会把仓库复制到你的账号、自动创建 D1 和 R2、接好 Workers Builds。完成后：
+From your deployed copy of the repository, apply migrations and set the secret:
 
 ```bash
-# 在你 fork 出来的仓库目录里
 pnpm install
-pnpm wrangler d1 migrations apply DB --remote        # 建表
-pnpm wrangler secret put ADMIN_TOKEN                 # 一串 ≥16 位随机字符串，管理页的登录令牌
-```
-
-然后做下面的「Email Routing」一步。
-
-### 方式二：fork + GitHub Actions
-
-1. Fork 本仓库。
-2. 仓库 Settings → Secrets and variables → Actions：
-   - Variables：`DEPLOY_WITH_ACTIONS` = `true`
-   - Secrets：`CLOUDFLARE_API_TOKEN`（Workers Scripts、D1、R2、Email Routing 均需 Edit）、`CLOUDFLARE_ACCOUNT_ID`、`ADMIN_TOKEN`
-3. 推一次 `main`，工作流会建表、部署、写入令牌。没有创建的 D1/R2 会由 wrangler 自动创建。
-
-### 方式三：本地 wrangler
-
-```bash
-pnpm install
-pnpm wrangler login
-pnpm run deploy            # 自动创建 D1/R2、建表、部署
+pnpm wrangler d1 migrations apply DB --remote
 pnpm wrangler secret put ADMIN_TOKEN
 ```
 
-### Email Routing（三种方式都要做）
+Continue with [Email Routing](#configure-email-routing).
 
-Dashboard → 你的域名 → Email → Email Routing：
+### Option 2: GitHub Actions
 
-1. 启用 Email Routing（按提示添加 MX / SPF 记录，一键即可）。
-2. Routing rules → Create address → 填要共享的地址（如 `share@yourdomain.com`）→ Action 选 **Send to a Worker** → 选本 Worker。
-3. 想同时把邮件转到真实邮箱：在 Destination addresses 验证一个目标邮箱，填进 `vars.FORWARD_TO`。
+1. Fork the repository.
+2. In **Settings → Secrets and variables → Actions**, add:
+   - Variable `DEPLOY_WITH_ACTIONS=true`
+   - Secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and `ADMIN_TOKEN`
+3. Give the API token the required Cloudflare permissions for Workers, D1, R2, and Email Routing.
+4. Push to `main` or manually run the workflow.
 
-发一封测试邮件到该地址，打开 `https://<你的 Worker 地址>/admin`，输入令牌，这个邮箱就会出现在列表里，生成链接即可分享。
+The workflow installs dependencies, applies migrations, deploys, and configures the admin secret. It runs only when `DEPLOY_WITH_ACTIONS` is enabled.
 
-### 自定义域名与语言
+### Option 3: Wrangler CLI
 
-`wrangler.jsonc` 顶层是通用模板。要绑自己的域名、改语言，照 `env.production` 的写法加一个环境（或直接改顶层）：
+```bash
+git clone https://github.com/funcin/inboxshare.git
+cd inboxshare
+pnpm install
+pnpm wrangler login
+pnpm run deploy
+pnpm wrangler secret put ADMIN_TOKEN
+```
+
+The top-level `wrangler.jsonc` is a reusable template. The included `env.production` contains the author's deployment-specific domains and resource identifiers. Replace or remove that environment before using a production environment of your own.
+
+### Configure Email Routing
+
+All deployment options require this step.
+
+1. Open **Cloudflare Dashboard → your domain → Email → Email Routing** and enable it. Complete the MX/SPF DNS setup.
+2. Under **Routing rules**, create a receiving address, for example `share@yourdomain.com`.
+3. Choose **Send to a Worker** and select the InboxShare Worker.
+4. Configure your original mailbox to forward **only the relevant senders or message types** to that address.
+5. Send a test email.
+6. Visit `https://<your-worker-host>/admin`, enter `ADMIN_TOKEN`, select the receiving address, and create a share link.
+7. Open the `/s/<key>` link to verify which messages are visible.
+
+You can optionally forward an additional copy to a verified destination using `FORWARD_TO`.
+
+### Custom domain and language
+
+Configure your own route and public URL in `wrangler.jsonc`:
 
 ```jsonc
 "routes": [{ "pattern": "inbox.yourdomain.com", "custom_domain": true }],
-"vars": { "PUBLIC_BASE_URL": "https://inbox.yourdomain.com", "LOCALE": "en" }
+"vars": {
+  "PUBLIC_BASE_URL": "https://inbox.yourdomain.com",
+  "LOCALE": "en"
+}
 ```
 
-`custom_domain: true` 会在部署时自动创建 DNS 记录和证书。注意配置了 `routes` 后 wrangler 默认关闭 `workers.dev` 入口。
+Keep the required resource bindings and other variables from the existing config. A custom domain route can change access to the `workers.dev` endpoint.
 
-## 首页
+## Configuration reference
 
-`/` 是产品落地页（按 `LOCALE` 渲染），`/en` 和 `/zh` 固定语言并互相标 hreflang。只有这几个路径允许索引和缓存；`/s/*`、`/admin`、`/api/*` 始终 noindex + no-store。首页文案在 `src/landing-i18n.ts`。
+| Setting | Location | Description |
+| --- | --- | --- |
+| `ADMIN_TOKEN` | Wrangler secret / `.dev.vars` | Required admin token, minimum 16 characters. Admin endpoints return 503 when missing. |
+| `RETENTION_DAYS` | `vars` | Days to retain email and attachments; default `30`. |
+| `PUBLIC_BASE_URL` | `vars` | Base URL in share links; defaults to the current request origin if empty. |
+| `FORWARD_TO` | `vars` | Optional additional destination, verified in Cloudflare Email Routing. |
+| `LOCALE` | `vars` | `zh-CN` (default) or `en`. |
 
-## 配置
+A daily scheduled Worker task deletes messages and attachments beyond the retention period.
 
-| 项 | 位置 | 说明 |
-|---|---|---|
-| `ADMIN_TOKEN` | secret | 管理接口 Bearer 令牌，≥16 字符；未设置时管理接口返回 503 |
-| `RETENTION_DAYS` | vars | 邮件保留天数，默认 30 |
-| `PUBLIC_BASE_URL` | vars | 分享链接前缀，留空用请求 origin |
-| `FORWARD_TO` | vars | 可选，收到后整体转发到此地址（须在 Email Routing 验证） |
-| `LOCALE` | vars | 分享页与管理页语言：`zh-CN`（默认）或 `en` |
-
-## 本地开发
+## Local development
 
 ```bash
 pnpm install
-cp .dev.vars.example .dev.vars        # 改 ADMIN_TOKEN（≥16 字符）
+cp .dev.vars.example .dev.vars
+# Set a unique ADMIN_TOKEN in .dev.vars (16+ characters)
 pnpm db:migrate:local
-pnpm dev                              # http://127.0.0.1:8787
-pnpm test:email                       # 投递一封样例邮件到 share@example.com
-pnpm test:classify                    # 验证码识别与分类用例
+pnpm dev
 ```
 
-打开 `http://127.0.0.1:8787/admin`，输入令牌 → 选邮箱、时间窗口 → 生成链接 → 打开 `/s/<key>`。
+Open `http://127.0.0.1:8787/admin`. To send a sample message and validate the classification rules:
 
-## 安全设计
+```bash
+pnpm test:email
+pnpm test:classify
+pnpm typecheck
+```
 
-- 链接 key 32 位 URL 安全随机串（约 192 bit 熵），可设过期时间，可随时撤销。
-- 密码重置、账单、账户安全类邮件默认不进分享页（`src/classify.ts`），避免拿到链接的人借此接管账号。
-- 所有响应 `no-store` + `noindex` + `no-referrer`；自家页面 CSP `default-src 'none'`。
-- 邮件 HTML 在浏览器端消毒（去 script/form/iframe/on* 属性、非 http(s)/mailto 链接、外链图片）后，
-  放进 `sandbox="allow-popups allow-popups-to-escape-sandbox"` 的 iframe，srcdoc 自带
-  `default-src 'none'; img-src data:` CSP，远程追踪像素不会加载。
-- 附件强制下载；可被浏览器直接执行的类型改成 `application/octet-stream`。
-- 管理令牌常量时间比较；令牌只存于浏览器 sessionStorage。
+Create a share link in the admin dashboard and open `/s/<key>` to inspect the read-only view.
 
-## 已知限制
+## Security and privacy
 
-- 单条邮件（含附件）上限受 Email Workers 限制（约 25 MB）；HTML 正文 >700 KB 时落 R2。
-- `cid:` 内联图片不显示（CSP 只放行 data: 图片）。验证码类邮件基本不受影响。
-- 公开接口没有限速；如暴露在公网建议在 Cloudflare 加一条 Rate Limiting 规则（`/api/s/*`）。
-- 转发链路的 DMARC：Gmail、iCloud 的转发会保留原始 DKIM 签名；Outlook 请用"重定向"而不是"转发"。
+**Anyone with a valid share URL can access the messages permitted by that link. Treat it as a secret.**
 
-## 合规提示
+- Share keys are random 32-character URL-safe strings; they can expire or be revoked.
+- Rolling windows and `RETENTION_DAYS` constrain message visibility.
+- Password resets, billing, and account-security changes are excluded by default. Administrators can explicitly allow them, so only share links with people you trust.
+- Mail HTML is sanitized in the browser and rendered in a sandboxed iframe with restrictive CSP; remote images are blocked.
+- Attachments download rather than execute inline; active-content file formats use `application/octet-stream`.
+- Responses use `no-store`, `noindex`, and `no-referrer` policies.
+- Admin access uses `ADMIN_TOKEN`; it is not stored in the repository.
 
-InboxShare 是邮件工具，不绕过任何平台的验证机制。流媒体等服务对账号共享有各自的条款（例如 Netflix 要求验证码仅在同一住所成员间使用），请在条款允许的范围内使用。
+**Deployment warning:** Public viewer endpoints have no built-in rate limiting. Consider a Cloudflare rate-limiting rule for `/api/s/*`. Only forward emails required for your use case. Even a read-only message can contain an actionable sign-in or account-management link.
+
+## Limitations
+
+- Cloudflare Email Workers impose size limits on incoming messages, approximately 25 MB including attachments.
+- Large HTML bodies use R2; inline `cid:` images are not displayed.
+- Forwarding and DMARC behavior differs across mail providers; test delivery from each sender you need.
+- Cloudflare plan usage and charges depend on your account and applicable limits.
+- InboxShare does not override streaming platform household policies or other account-sharing terms.
+
+## FAQ
+
+**Is this a temporary email service?** No. It uses an email address on a domain you control and can receive messages forwarded from your existing mailbox.
+
+**Does it connect directly to my Gmail account?** No Gmail OAuth is required for the forwarding workflow. You set forwarding rules at your email provider.
+
+**Does it generate OTPs or TOTP codes?** No. It detects likely codes inside received emails.
+
+**Can viewers reply or manage my mailbox?** No. The shared page is read-only and does not grant access to the original mailbox. However, viewing verification emails can expose sensitive credentials, so configure filters carefully.
+
+## 中文简介
+
+**InboxShare：把指定验证邮件转发到共享收件箱，通过固定的只读链接让授权成员自助查看验证码。**
+
+例如，家庭或团队共同管理订阅服务时，管理员无需反复打开邮箱并人工分发登录验证码。用户只需在原邮箱设置过滤与转发规则，让相关邮件到达自己域名下的接收地址。随后在 InboxShare 管理页面创建分享链接，成员即可打开网页查看最近的邮件。
+
+- 不共享原始邮箱密码，访客无需注册或安装 App。
+- 自动识别邮件中的验证码，支持复制。
+- 可配置链接有效期、撤销链接及邮件可见时间窗口。
+- 密码重置、账单和账号安全邮件默认不对访客展示。
+- 使用 Cloudflare Workers、Email Routing、D1 和 R2 自行部署，支持中文和英文界面。
+
+本工具不绕过平台验证机制。账号使用仍需遵守服务提供商的相关条款。部署步骤、配置和安全说明见上面的英文文档。
 
 ## License
 
