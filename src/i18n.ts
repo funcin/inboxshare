@@ -6,7 +6,7 @@
 export type Locale = 'zh-CN' | 'en';
 
 export function resolveLocale(value: string | undefined): Locale {
-  return value?.trim().toLowerCase().startsWith('en') ? 'en' : 'zh-CN';
+  return value?.trim().toLowerCase() === 'zh-cn' || value?.trim().toLowerCase() === 'zh' ? 'zh-CN' : 'en';
 }
 
 const zhCN = {
