@@ -44,4 +44,5 @@
 - 品牌词只出现在显示层（标题、README、Logo）。硬标识（GitHub 组织、仓库、域名、Worker 名）一旦定下不再随品牌变动。
 - 待办（站长）：注册 inboxshare.app → 把域名接入 Cloudflare → 建 GitHub 组织 `inboxshare`。
 - 2026-10-28 开源前整改完成：敏感邮件分类与隔离（迁移 0003，链接 show_sensitive）、Deploy 按钮 + fork 即部署 Actions + `pnpm run deploy`、wrangler.jsonc 顶层通用化（作者实例移到 env.production）、README/CLAUDE.md 换品牌 InboxShare。代码推到 `funcin/inboxshare`（站长已建）。
-- 待办（站长）：Cloudflare Worker `emailshare` → Settings → Build：把 Git 仓库切到 `funcin/inboxshare`，部署命令改成 `pnpm run deploy:production`；之后归档旧仓库 `funcin/emailshare`。域名 inboxshare.app 注册后再加路由。
+- 2026-10-28 站长把 Worker 从 `emailshare` 改名为 `inboxshare`（密钥、D1、R2、mail.funcin.de 均保留），wrangler.jsonc 的 name 同步改为 `inboxshare`。
+- 待办（站长）：确认 Workers Builds 已接 `funcin/inboxshare` 且部署命令为 `pnpm run deploy:production`；之后归档旧仓库 `funcin/emailshare`。域名 inboxshare.app 注册后再加路由。

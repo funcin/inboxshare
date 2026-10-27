@@ -7,7 +7,7 @@
   //   - 想绑自定义域名、改语言，照着下面 env.production 的写法加一个你自己的环境
   // env.production 是本仓库作者自己的实例，fork 后删掉或改成你的。
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "emailshare",
+  "name": "inboxshare",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
@@ -37,9 +37,9 @@
   "observability": { "enabled": true },
 
   "env": {
-    // 作者实例：Workers Builds 的部署命令是 `pnpm run deploy:production`
+    // 作者实例（Worker `inboxshare`）：Workers Builds 的部署命令是 `pnpm run deploy:production`
     "production": {
-      "name": "emailshare",
+      "name": "inboxshare",
       "routes": [{ "pattern": "mail.funcin.de", "custom_domain": true }],
       "d1_databases": [
         {

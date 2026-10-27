@@ -27,7 +27,7 @@ Worker 解析、识别验证码、分类后把元数据/正文存 D1、附件存
 - 业务数据：D1（表 `messages`、`share_links`，schema 在 `migrations/`，新字段只加迁移文件不改旧文件）。
 - 附件与超大正文：R2（键 `att/<msgId>/<n>`、`body/<msgId>.html`）。
 - 配置：`wrangler.jsonc` 唯一来源。**顶层是通用模板**（无资源 id、无路由，fork 即可用）；
-  `env.production` 是作者实例（Worker `emailshare`、D1 `shared-inbox`、域名 `mail.funcin.de`）。
+  `env.production` 是作者实例（Worker `inboxshare`、D1 `shared-inbox`、域名 `mail.funcin.de`）。
   作者实例的 Workers Builds 部署命令是 `pnpm run deploy:production`（先远程迁移再部署）。
 - 邮件最长保留 `RETENTION_DAYS`（默认 30），每天 03:17 UTC 的 cron 清理 D1 + R2。
 
