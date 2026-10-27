@@ -37,3 +37,10 @@
 - B SubNest + 本 Worker 当邮箱后端：多 1~2 天接口开发 + Workers 付费版（Queues），只在需要合租管理时值得。
 - C SubNest + 自建 LanQin 邮局：VPS + 25 端口 + 邮局运维，且公开 LanQin 缺 SubNest 私有接口，不选。
 - D 向作者要 mail.newszxcn.com 令牌：验证码邮件经第三方，不选。
+
+## 决策记录（2026-10-28）：品牌与域名
+- 品牌名 **InboxShare**，域名 **inboxshare.app**（.com 在 Atom 出售、.io 被一个无流量静态页占用；两者均无注册商标，判断可正面竞争）。
+- 否决：OTPLink（OTP 易被理解为短信验证码）、InboxLink（.com/.app 已被占且 .app 一个月前刚被注册）、emailcodeshare（描述性太强、无品牌感，仅作备选）。
+- 品牌词只出现在显示层（标题、README、Logo）。硬标识（GitHub 组织、仓库、域名、Worker 名）一旦定下不再随品牌变动。
+- 待办（站长）：注册 inboxshare.app → 把域名接入 Cloudflare → 建 GitHub 组织 `inboxshare`。
+- 待办（Claude）：仓库迁到 `inboxshare/inboxshare`、Worker 加 inboxshare.app 自定义域名、PUBLIC_BASE_URL 改新域名、README/CLAUDE.md 换品牌、开源发布前三件事（敏感邮件隔离、一键部署、去硬编码）。
