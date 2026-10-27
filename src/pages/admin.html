@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="@@LOCALE@@">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>共享收件箱 · 管理</title>
+<title>{{adminTitle}}</title>
 <style>
   :root { color-scheme: light dark; --bg:#f5f6f8; --card:#fff; --fg:#111827; --muted:#6b7280; --line:#e5e7eb; --accent:#059669; --danger:#b91c1c; }
   @media (prefers-color-scheme: dark) { :root { --bg:#0f1419; --card:#171d26; --fg:#e5e7eb; --muted:#9ca3af; --line:#2a3340; --accent:#34d399; --danger:#f87171; } }
@@ -37,7 +37,7 @@
     thead { display:none; }
     tr { border:1px solid var(--line); border-radius:10px; padding:6px 10px; margin-bottom:10px; }
     td { display:flex; gap:10px; border:0; padding:5px 0; }
-    td::before { content:attr(data-label); flex:0 0 4em; color:var(--muted); font-size:13px; }
+    td::before { content:attr(data-label); flex:0 0 6em; color:var(--muted); font-size:13px; }
     td.actions::before { content:none; }
     td.actions { gap:8px; padding-top:8px; white-space:normal; }
     td.actions button { flex:1; }
@@ -46,53 +46,61 @@
 </head>
 <body>
 <div class="wrap">
-  <h1>共享收件箱 · 管理</h1>
+  <h1>{{adminTitle}}</h1>
 
   <div class="card" id="auth">
-    <label for="token">管理令牌（ADMIN_TOKEN，仅存于本标签页）</label>
-    <div class="grid"><input id="token" type="password" autocomplete="off"><button class="primary" id="login">进入</button></div>
-    <div class="err hidden" id="auth-err">令牌错误或管理接口未启用</div>
+    <label for="token">{{tokenLabel}}</label>
+    <div class="grid"><input id="token" type="password" autocomplete="off"><button class="primary" id="login">{{enter}}</button></div>
+    <div class="err hidden" id="auth-err">{{authErr}}</div>
   </div>
 
   <div id="app" class="hidden">
     <div class="card">
-      <h2 style="font-size:16px;margin:0 0 10px">新建分享链接</h2>
+      <h2 style="font-size:16px;margin:0 0 10px">{{newLink}}</h2>
       <div class="grid">
-        <div><label for="mailbox">邮箱地址</label><input id="mailbox" list="mailboxes" placeholder="share@yourdomain.com"><datalist id="mailboxes"></datalist></div>
-        <div><label for="window">时间窗口</label>
+        <div><label for="mailbox">{{mailbox}}</label><input id="mailbox" list="mailboxes" placeholder="{{mailboxPlaceholder}}"><datalist id="mailboxes"></datalist></div>
+        <div><label for="window">{{window}}</label>
           <select id="window">
-            <option value="30">最近 30 分钟</option><option value="60">最近 1 小时</option><option value="360">最近 6 小时</option>
-            <option value="1440">最近 1 天</option><option value="10080">最近 7 天</option><option value="0">不限（受保留期约束）</option>
+            <option value="30">{{win30}}</option><option value="60">{{win60}}</option><option value="360">{{win360}}</option>
+            <option value="1440">{{win1440}}</option><option value="10080">{{win10080}}</option><option value="0">{{win0}}</option>
           </select></div>
-        <div><label for="expires">链接过期时间（可选）</label><input id="expires" type="datetime-local"></div>
-        <div><label for="label">备注（可选）</label><input id="label" placeholder="例如：Disney 合租"></div>
-        <div><button class="primary" id="create">生成链接</button></div>
+        <div><label for="expires">{{expires}}</label><input id="expires" type="datetime-local"></div>
+        <div><label for="label">{{label}}</label><input id="label" placeholder="{{labelPlaceholder}}"></div>
+        <div><button class="primary" id="create">{{create}}</button></div>
       </div>
       <div class="err hidden" id="create-err"></div>
       <div class="muted" id="created" style="margin-top:10px"></div>
     </div>
 
     <div class="card">
-      <h2 style="font-size:16px;margin:0 0 10px">已收到邮件的邮箱</h2>
-      <table><thead><tr><th>邮箱</th><th>邮件数</th><th>最近一封</th></tr></thead><tbody id="mb-rows"></tbody></table>
-      <div class="muted" id="mb-empty">还没有收到任何邮件。先在 Cloudflare Email Routing 里把地址指向这个 Worker。</div>
+      <h2 style="font-size:16px;margin:0 0 10px">{{mailboxes}}</h2>
+      <table><thead><tr><th>{{thMailbox}}</th><th>{{thCount}}</th><th>{{thLatest}}</th></tr></thead><tbody id="mb-rows"></tbody></table>
+      <div class="muted" id="mb-empty">{{mbEmpty}}</div>
     </div>
 
     <div class="card">
-      <h2 style="font-size:16px;margin:0 0 10px">分享链接</h2>
-      <table><thead><tr><th>链接</th><th>邮箱</th><th>窗口</th><th>状态</th><th>过期</th><th></th></tr></thead><tbody id="link-rows"></tbody></table>
-      <div class="muted hidden" id="link-empty">暂无链接</div>
+      <h2 style="font-size:16px;margin:0 0 10px">{{links}}</h2>
+      <table><thead><tr><th>{{thLink}}</th><th>{{thMailbox}}</th><th>{{thWindow}}</th><th>{{thStatus}}</th><th>{{thExpires}}</th><th></th></tr></thead><tbody id="link-rows"></tbody></table>
+      <div class="muted hidden" id="link-empty">{{linkEmpty}}</div>
     </div>
   </div>
 </div>
 
+<script>window.__I18N__ = @@I18N_JSON@@; window.__LOCALE__ = "@@LOCALE@@";</script>
 <script>
 (function () {
+  var T = window.__I18N__;
+  var LOCALE = window.__LOCALE__ === 'en' ? 'en-US' : 'zh-CN';
   var $ = function (id) { return document.getElementById(id); };
   var token = sessionStorage.getItem('shared-inbox-admin-token') || '';
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function fmt(ms) { return ms ? new Date(ms).toLocaleString('zh-CN', { hour12: false }) : '—'; }
-  function win(m) { return !m ? '不限' : m < 60 ? m + ' 分钟' : m < 1440 ? (m / 60) + ' 小时' : (m / 1440) + ' 天'; }
+  function tpl(s, vars) { return s.replace(/\{(\w+)\}/g, function (_, k) { return vars[k] != null ? vars[k] : ''; }); }
+  function fmt(ms) { return ms ? new Date(ms).toLocaleString(LOCALE, { hour12: false, year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'; }
+  function win(m) { return !m ? T.winAll : m < 60 ? tpl(T.winMin, { n: m }) : m < 1440 ? tpl(T.winHour, { n: m / 60 }) : tpl(T.winDay, { n: m / 1440 }); }
+  function statusLabel(s) { return s === 'active' ? T.statusActive : s === 'revoked' ? T.statusRevoked : s === 'expired' ? T.statusExpired : s; }
+  function errorLabel(code) {
+    return { invalid_mailbox: T.errInvalidMailbox, invalid_window: T.errInvalidWindow, invalid_expires_at: T.errInvalidExpires, expires_in_past: T.errExpiresPast }[code] || code;
+  }
   function req(path, opts) {
     opts = opts || {};
     opts.headers = Object.assign({ 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, opts.headers || {});
@@ -112,7 +120,9 @@
   function refresh() {
     req('/api/admin/mailboxes').then(function (r) {
       var rows = r.body.items || [];
-      $('mb-rows').innerHTML = rows.map(function (m) { return '<tr><td data-label="邮箱"><code>' + esc(m.mailbox) + '</code></td><td data-label="邮件数">' + m.count + '</td><td data-label="最近一封">' + esc(fmt(m.latest)) + '</td></tr>'; }).join('');
+      $('mb-rows').innerHTML = rows.map(function (m) {
+        return '<tr><td data-label="' + esc(T.thMailbox) + '"><code>' + esc(m.mailbox) + '</code></td><td data-label="' + esc(T.thCount) + '">' + m.count + '</td><td data-label="' + esc(T.thLatest) + '">' + esc(fmt(m.latest)) + '</td></tr>';
+      }).join('');
       $('mb-empty').classList.toggle('hidden', rows.length > 0);
       $('mailboxes').innerHTML = rows.map(function (m) { return '<option value="' + esc(m.mailbox) + '">'; }).join('');
     });
@@ -120,11 +130,11 @@
       var rows = r.body.items || [];
       $('link-empty').classList.toggle('hidden', rows.length > 0);
       $('link-rows').innerHTML = rows.map(function (l) {
-        return '<tr><td data-label="链接"><div><a href="' + esc(l.url) + '" target="_blank" rel="noopener"><code>/s/' + esc(l.key.slice(0, 8)) + '…</code></a>'
+        return '<tr><td data-label="' + esc(T.thLink) + '"><div><a href="' + esc(l.url) + '" target="_blank" rel="noopener"><code>/s/' + esc(l.key.slice(0, 8)) + '…</code></a>'
           + (l.label ? '<div class="muted">' + esc(l.label) + '</div>' : '') + '</div></td>'
-          + '<td data-label="邮箱"><code>' + esc(l.mailbox) + '</code></td><td data-label="窗口">' + win(l.window_minutes) + '</td>'
-          + '<td data-label="状态"><span class="tag ' + esc(l.status) + '">' + esc(l.status) + '</span></td><td data-label="过期">' + esc(fmt(l.expires_at)) + '</td>'
-          + '<td class="actions">' + (l.status === 'active' ? '<button class="danger" data-revoke="' + esc(l.key) + '">撤销</button> <button data-copy="' + esc(l.url) + '">复制</button>' : '') + '</td></tr>';
+          + '<td data-label="' + esc(T.thMailbox) + '"><code>' + esc(l.mailbox) + '</code></td><td data-label="' + esc(T.thWindow) + '">' + esc(win(l.window_minutes)) + '</td>'
+          + '<td data-label="' + esc(T.thStatus) + '"><span class="tag ' + esc(l.status) + '">' + esc(statusLabel(l.status)) + '</span></td><td data-label="' + esc(T.thExpires) + '">' + esc(fmt(l.expires_at)) + '</td>'
+          + '<td class="actions">' + (l.status === 'active' ? '<button class="danger" data-revoke="' + esc(l.key) + '">' + esc(T.revoke) + '</button> <button data-copy="' + esc(l.url) + '">' + esc(T.copy) + '</button>' : '') + '</td></tr>';
       }).join('');
     });
   }
@@ -137,8 +147,8 @@
     var expires = $('expires').value ? new Date($('expires').value).toISOString() : null;
     req('/api/admin/links', { method: 'POST', body: JSON.stringify({ mailbox: $('mailbox').value, windowMinutes: Number($('window').value), expiresAt: expires, label: $('label').value }) })
       .then(function (r) {
-        if (!r.ok) { $('create-err').textContent = '创建失败：' + (r.body.error || r.status); $('create-err').classList.remove('hidden'); return; }
-        $('created').innerHTML = '已生成：<a href="' + esc(r.body.link.url) + '" target="_blank" rel="noopener">' + esc(r.body.link.url) + '</a>';
+        if (!r.ok) { $('create-err').textContent = tpl(T.createFailed, { reason: errorLabel(r.body.error || r.status) }); $('create-err').classList.remove('hidden'); return; }
+        $('created').innerHTML = esc(T.created) + '<a href="' + esc(r.body.link.url) + '" target="_blank" rel="noopener">' + esc(r.body.link.url) + '</a>';
         refresh();
       });
   });
@@ -146,11 +156,11 @@
   document.addEventListener('click', function (e) {
     var t = e.target;
     if (t.dataset && t.dataset.revoke) {
-      if (!confirm('撤销后该链接立即失效，确定？')) return;
+      if (!confirm(T.confirmRevoke)) return;
       req('/api/admin/links/' + encodeURIComponent(t.dataset.revoke), { method: 'DELETE' }).then(refresh);
     }
     if (t.dataset && t.dataset.copy && navigator.clipboard) {
-      navigator.clipboard.writeText(t.dataset.copy).then(function () { t.textContent = '已复制'; setTimeout(function () { t.textContent = '复制'; }, 1500); });
+      navigator.clipboard.writeText(t.dataset.copy).then(function () { t.textContent = T.copied; setTimeout(function () { t.textContent = T.copy; }, 1500); });
     }
   });
 

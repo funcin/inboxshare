@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { createLink, listLinks, listMailboxes, revokeLink } from '../db';
+import { ADMIN_DICTS, renderPage, resolveLocale } from '../i18n';
 import adminPage from '../pages/admin.html';
 import { WINDOW_OPTIONS, type Env, type ShareLinkRow } from '../types';
 import { isValidMailbox, normalizeMailbox, randomKey, safeEqual } from '../util';
@@ -24,7 +25,10 @@ function withUrl(link: ShareLinkRow, base: string) {
 }
 
 export function registerAdminRoutes(app: App): void {
-  app.get('/admin', (c) => c.html(adminPage));
+  app.get('/admin', (c) => {
+    const locale = resolveLocale(c.env.LOCALE);
+    return c.html(renderPage(adminPage, locale, ADMIN_DICTS[locale]));
+  });
 
   // 所有 /api/admin/* 都要 Bearer ADMIN_TOKEN；未配置 token 时整个管理接口关闭
   app.use('/api/admin/*', async (c, next) => {

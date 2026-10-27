@@ -23,7 +23,9 @@
 
 2026-10-28 分享页按 Claude Design 设计稿重做：发件人头像、相对时间、验证码标签与复制卡片、锁形信任提示；服务端新增 `code` 列（迁移 0002）与识别器；`LOCALE` 中英切换。本地中英、桌面手机真实渲染通过。
 
-未做（可选）：管理页仍只有中文；`/api/s/*` 的 Rate Limiting 规则；`FORWARD_TO` 目前为空，hi@funcin.de 的邮件只进共享收件箱不转发。
+2026-10-28 管理页也跟随 LOCALE 中英双语（字典在 src/i18n.ts 的 ADMIN_DICTS）。
+
+未做（可选）：`/api/s/*` 的 Rate Limiting 规则；`FORWARD_TO` 目前为空，hi@funcin.de 的邮件只进共享收件箱不转发。
 
 ## 审查
 - 页面只读，HTML 在浏览器端消毒 + sandbox iframe + srcdoc CSP；附件强制下载。

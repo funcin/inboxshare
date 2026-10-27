@@ -55,7 +55,7 @@ pnpm test:email                       # 投递一封样例邮件到 share@exampl
 | `RETENTION_DAYS` | vars | 邮件保留天数，默认 30 |
 | `PUBLIC_BASE_URL` | vars | 分享链接前缀，留空用请求 origin |
 | `FORWARD_TO` | vars | 可选，收到后整体转发到此地址（须在 Email Routing 验证） |
-| `LOCALE` | vars | 分享页语言：`zh-CN`（默认）或 `en`，部署时定 |
+| `LOCALE` | vars | 分享页与管理页语言：`zh-CN`（默认）或 `en`，部署时定 |
 
 时间窗口可选：`0`（不限，仍受保留期约束）、`30`、`60`、`360`、`1440`、`10080` 分钟，相对“现在”滚动计算。
 
