@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>共享收件箱 · 管理</title>
+<style>
+  :root { color-scheme: light dark; --bg:#f5f6f8; --card:#fff; --fg:#111827; --muted:#6b7280; --line:#e5e7eb; --accent:#059669; --danger:#b91c1c; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0f1419; --card:#171d26; --fg:#e5e7eb; --muted:#9ca3af; --line:#2a3340; --accent:#34d399; --danger:#f87171; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Noto Sans SC",sans-serif; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 20px; margin: 0 0 14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:14px; }
+  label { display:block; font-size:13px; color:var(--muted); margin-bottom:4px; }
+  input, select { font:inherit; width:100%; padding:7px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--fg); }
+  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:end; }
+  button { font:inherit; cursor:pointer; border:1px solid var(--line); background:var(--card); color:var(--fg); border-radius:8px; padding:7px 14px; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  button.danger { color:var(--danger); }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); vertical-align:top; overflow-wrap:anywhere; }
+  th { color:var(--muted); font-weight:500; font-size:13px; }
+  code { font-family: ui-monospace, Menlo, monospace; font-size:13px; }
+  .muted { color:var(--muted); font-size:13px; }
+  .err { color:var(--danger); font-size:13px; margin-top:8px; }
+  .hidden { display:none !important; }
+  .tag { font-size:12px; padding:1px 7px; border-radius:999px; border:1px solid var(--line); }
+  .tag.active { color:var(--accent); border-color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>共享收件箱 · 管理</h1>
+
+  <div class="card" id="auth">
+    <label for="token">管理令牌（ADMIN_TOKEN，仅存于本标签页）</label>
+    <div class="grid"><input id="token" type="password" autocomplete="off"><button class="primary" id="login">进入</button></div>
+    <div class="err hidden" id="auth-err">令牌错误或管理接口未启用</div>
+  </div>
+
+  <div id="app" class="hidden">
+    <div class="card">
+      <h2 style="font-size:16px;margin:0 0 10px">新建分享链接</h2>
+      <div class="grid">
+        <div><label for="mailbox">邮箱地址</label><input id="mailbox" list="mailboxes" placeholder="share@yourdomain.com"><datalist id="mailboxes"></datalist></div>
+        <div><label for="window">时间窗口</label>
+          <select id="window">
+            <option value="30">最近 30 分钟</option><option value="60">最近 1 小时</option><option value="360">最近 6 小时</option>
+            <option value="1440">最近 1 天</option><option value="10080">最近 7 天</option><option value="0">不限（受保留期约束）</option>
+          </select></div>
+        <div><label for="expires">链接过期时间（可选）</label><input id="expires" type="datetime-local"></div>
+        <div><label for="label">备注（可选）</label><input id="label" placeholder="例如：Disney 合租"></div>
+        <div><button class="primary" id="create">生成链接</button></div>
+      </div>
+      <div class="err hidden" id="create-err"></div>
+      <div class="muted" id="created" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:16px;margin:0 0 10px">已收到邮件的邮箱</h2>
+      <table><thead><tr><th>邮箱</th><th>邮件数</th><th>最近一封</th></tr></thead><tbody id="mb-rows"></tbody></table>
+      <div class="muted" id="mb-empty">还没有收到任何邮件。先在 Cloudflare Email Routing 里把地址指向这个 Worker。</div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:16px;margin:0 0 10px">分享链接</h2>
+      <table><thead><tr><th>链接</th><th>邮箱</th><th>窗口</th><th>状态</th><th>过期</th><th></th></tr></thead><tbody id="link-rows"></tbody></table>
+      <div class="muted hidden" id="link-empty">暂无链接</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var token = sessionStorage.getItem('shared-inbox-admin-token') || '';
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function fmt(ms) { return ms ? new Date(ms).toLocaleString('zh-CN', { hour12: false }) : '—'; }
+  function win(m) { return !m ? '不限' : m < 60 ? m + ' 分钟' : m < 1440 ? (m / 60) + ' 小时' : (m / 1440) + ' 天'; }
+  function req(path, opts) {
+    opts = opts || {};
+    opts.headers = Object.assign({ 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }, opts.headers || {});
+    return fetch(path, opts).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, body: j }; }); });
+  }
+
+  function enter() {
+    token = $('token').value.trim();
+    req('/api/admin/session').then(function (r) {
+      if (!r.ok) { $('auth-err').classList.remove('hidden'); return; }
+      sessionStorage.setItem('shared-inbox-admin-token', token);
+      $('auth').classList.add('hidden'); $('app').classList.remove('hidden');
+      refresh();
+    });
+  }
+
+  function refresh() {
+    req('/api/admin/mailboxes').then(function (r) {
+      var rows = r.body.items || [];
+      $('mb-rows').innerHTML = rows.map(function (m) { return '<tr><td><code>' + esc(m.mailbox) + '</code></td><td>' + m.count + '</td><td>' + esc(fmt(m.latest)) + '</td></tr>'; }).join('');
+      $('mb-empty').classList.toggle('hidden', rows.length > 0);
+      $('mailboxes').innerHTML = rows.map(function (m) { return '<option value="' + esc(m.mailbox) + '">'; }).join('');
+    });
+    req('/api/admin/links').then(function (r) {
+      var rows = r.body.items || [];
+      $('link-empty').classList.toggle('hidden', rows.length > 0);
+      $('link-rows').innerHTML = rows.map(function (l) {
+        return '<tr><td><a href="' + esc(l.url) + '" target="_blank" rel="noopener"><code>/s/' + esc(l.key.slice(0, 8)) + '…</code></a>'
+          + (l.label ? '<div class="muted">' + esc(l.label) + '</div>' : '') + '</td>'
+          + '<td><code>' + esc(l.mailbox) + '</code></td><td>' + win(l.window_minutes) + '</td>'
+          + '<td><span class="tag ' + esc(l.status) + '">' + esc(l.status) + '</span></td><td>' + esc(fmt(l.expires_at)) + '</td>'
+          + '<td>' + (l.status === 'active' ? '<button class="danger" data-revoke="' + esc(l.key) + '">撤销</button> <button data-copy="' + esc(l.url) + '">复制</button>' : '') + '</td></tr>';
+      }).join('');
+    });
+  }
+
+  $('login').addEventListener('click', enter);
+  $('token').addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
+
+  $('create').addEventListener('click', function () {
+    $('create-err').classList.add('hidden');
+    var expires = $('expires').value ? new Date($('expires').value).toISOString() : null;
+    req('/api/admin/links', { method: 'POST', body: JSON.stringify({ mailbox: $('mailbox').value, windowMinutes: Number($('window').value), expiresAt: expires, label: $('label').value }) })
+      .then(function (r) {
+        if (!r.ok) { $('create-err').textContent = '创建失败：' + (r.body.error || r.status); $('create-err').classList.remove('hidden'); return; }
+        $('created').innerHTML = '已生成：<a href="' + esc(r.body.link.url) + '" target="_blank" rel="noopener">' + esc(r.body.link.url) + '</a>';
+        refresh();
+      });
+  });
+
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (t.dataset && t.dataset.revoke) {
+      if (!confirm('撤销后该链接立即失效，确定？')) return;
+      req('/api/admin/links/' + encodeURIComponent(t.dataset.revoke), { method: 'DELETE' }).then(refresh);
+    }
+    if (t.dataset && t.dataset.copy && navigator.clipboard) {
+      navigator.clipboard.writeText(t.dataset.copy).then(function () { t.textContent = '已复制'; setTimeout(function () { t.textContent = '复制'; }, 1500); });
+    }
+  });
+
+  if (token) { $('token').value = token; enter(); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>共享收件箱</title>
+<style>
+  :root { color-scheme: light dark;
+    --bg: #f5f6f8; --card: #fff; --fg: #111827; --muted: #6b7280; --line: #e5e7eb; --accent: #059669; --accent-bg: #ecfdf5; --danger: #b91c1c; }
+  @media (prefers-color-scheme: dark) { :root {
+    --bg: #0f1419; --card: #171d26; --fg: #e5e7eb; --muted: #9ca3af; --line: #2a3340; --accent: #34d399; --accent-bg: #0f2a22; --danger: #f87171; } }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Noto Sans SC", sans-serif; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 14px; }
+  header h1 { font-size: 18px; margin: 0; }
+  .badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--accent-bg); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+  .addr { display: inline-flex; align-items: center; gap: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: var(--muted); }
+  button { font: inherit; cursor: pointer; border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 8px; padding: 6px 12px; }
+  button:hover { border-color: var(--accent); }
+  .layout { display: grid; grid-template-columns: 360px 1fr; gap: 14px; }
+  @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } .layout.detail-open .list { display: none; } .layout:not(.detail-open) .detail { display: none; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .list-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+  .items { list-style: none; margin: 0; padding: 0; max-height: 75vh; overflow: auto; }
+  .items li { padding: 12px 14px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .items li:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+  .items li.active { background: var(--accent-bg); }
+  .row1 { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
+  .from { font-weight: 600; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .subject { margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .snippet { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .empty { padding: 40px 14px; text-align: center; color: var(--muted); }
+  .detail { display: flex; flex-direction: column; min-height: 60vh; }
+  .detail-head { padding: 14px; border-bottom: 1px solid var(--line); }
+  .detail-head h2 { margin: 0 0 6px; font-size: 17px; overflow-wrap: anywhere; }
+  .meta { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+  .back { display: none; margin-bottom: 8px; }
+  @media (max-width: 800px) { .back { display: inline-block; } }
+  iframe { flex: 1; width: 100%; min-height: 55vh; border: 0; background: #fff; }
+  pre.text { margin: 0; padding: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .atts { padding: 10px 14px; border-top: 1px solid var(--line); font-size: 13px; }
+  .atts a { color: var(--accent); margin-right: 12px; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 12px; }
+  .error { color: var(--danger); }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>共享收件箱</h1>
+    <span class="badge" id="window">只读分享</span>
+    <span class="addr"><span id="mailbox">…</span><button type="button" id="copy" title="复制地址">复制</button></span>
+    <button type="button" id="refresh" style="margin-left:auto">刷新</button>
+  </header>
+
+  <div id="denied" class="card empty hidden">无权访问：链接不存在、已撤销或已过期。</div>
+
+  <div class="layout" id="layout">
+    <section class="card list">
+      <div class="list-head"><span>最新邮件</span><span id="count">—</span></div>
+      <ul class="items" id="items"></ul>
+      <div class="empty hidden" id="empty">当前时间范围内没有邮件</div>
+      <div class="empty" id="loading">正在加载邮件…</div>
+    </section>
+
+    <section class="card detail">
+      <div class="detail-head">
+        <button type="button" class="back" id="back">← 返回列表</button>
+        <div id="placeholder" class="meta">选择一封邮件查看内容</div>
+        <div id="detail-meta" class="hidden">
+          <h2 id="d-subject"></h2>
+          <div class="meta" id="d-from"></div>
+          <div class="meta" id="d-time"></div>
+        </div>
+      </div>
+      <iframe id="frame" class="hidden" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" title="邮件正文"></iframe>
+      <pre class="text hidden" id="text"></pre>
+      <div class="atts hidden" id="atts"></div>
+    </section>
+  </div>
+
+  <p class="note">只读页面：无法回复、转发、删除或修改邮件。页面每 30 秒自动刷新。</p>
+</div>
+
+<script>
+(function () {
+  var key = location.pathname.split('/').pop();
+  var api = '/api/s/' + encodeURIComponent(key);
+  var $ = function (id) { return document.getElementById(id); };
+  var current = null;
+
+  function windowLabel(m) {
+    if (!m) return '只读分享';
+    if (m < 60) return '最近 ' + m + ' 分钟';
+    if (m < 1440) return '最近 ' + (m / 60) + ' 小时';
+    return '最近 ' + (m / 1440) + ' 天';
+  }
+  function fmtTime(ms) { return ms ? new Date(ms).toLocaleString('zh-CN', { hour12: false }) : ''; }
+  function fromLabel(f) {
+    if (!f) return '未知发件人';
+    if (f.name && f.address) return f.name + ' <' + f.address + '>';
+    return f.name || f.address || '未知发件人';
+  }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+
+  // 邮件 HTML 消毒：去脚本/表单/外链资源，只保留 http(s)/mailto 链接；再放进 sandbox iframe + 严格 CSP
+  function sanitize(html) {
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('script, iframe, frame, object, embed, form, link, meta, base, applet, noscript').forEach(function (n) { n.remove(); });
+    doc.querySelectorAll('*').forEach(function (el) {
+      Array.prototype.slice.call(el.attributes).forEach(function (a) {
+        var name = a.name.toLowerCase(), v = a.value.trim();
+        if (name.indexOf('on') === 0 || name === 'srcdoc' || name === 'formaction') { el.removeAttribute(a.name); return; }
+        if (name === 'href') {
+          if (!/^(https?:|mailto:)/i.test(v)) { el.removeAttribute('href'); return; }
+          el.setAttribute('target', '_blank'); el.setAttribute('rel', 'noopener noreferrer');
+        }
+        if (name === 'src' && !/^data:image\//i.test(v)) { if (el.tagName === 'IMG') { el.remove(); return; } el.removeAttribute('src'); }
+        if (name === 'style' && /url\s*\(/i.test(v) && !/url\s*\(\s*['"]?data:image\//i.test(v)) el.removeAttribute('style');
+      });
+    });
+    return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
+      + '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; img-src data:; style-src \'unsafe-inline\'; font-src data:; base-uri \'none\'; form-action \'none\'">'
+      + '<style>html,body{margin:0;background:#fff;color:#111827}body{box-sizing:border-box;padding:20px;font:14px/1.65 -apple-system,Arial,sans-serif;overflow-wrap:anywhere}img,table{max-width:100%}img{height:auto}pre{white-space:pre-wrap}</style>'
+      + '</head><body>' + doc.body.innerHTML + '</body></html>';
+  }
+
+  function showDenied() {
+    $('denied').classList.remove('hidden');
+    $('layout').classList.add('hidden');
+    $('mailbox').textContent = '—';
+  }
+
+  function render(data) {
+    $('mailbox').textContent = data.mailbox;
+    $('window').textContent = windowLabel(data.windowMinutes);
+    document.title = (data.label ? data.label + ' · ' : '') + '共享收件箱';
+    $('count').textContent = data.items.length + ' 封';
+    $('loading').classList.add('hidden');
+    $('empty').classList.toggle('hidden', data.items.length > 0);
+    var ul = $('items'); ul.innerHTML = '';
+    data.items.forEach(function (m) {
+      var li = document.createElement('li');
+      li.dataset.id = m.id;
+      if (current === m.id) li.classList.add('active');
+      li.innerHTML = '<div class="row1"><span class="from">' + esc(fromLabel(m.from)) + '</span><span>' + esc(fmtTime(m.receivedAt)) + '</span></div>'
+        + '<div class="subject">' + esc(m.subject || '（无主题）') + (m.attachmentCount ? ' 📎' : '') + '</div>'
+        + '<div class="snippet">' + esc(m.snippet || '') + '</div>';
+      li.addEventListener('click', function () { open(m.id); });
+      ul.appendChild(li);
+    });
+  }
+
+  function load() {
+    fetch(api + '/messages', { cache: 'no-store' }).then(function (r) {
+      if (r.status === 403) { showDenied(); return null; }
+      return r.json();
+    }).then(function (d) { if (d) render(d); }).catch(function () { $('loading').textContent = '加载失败，请刷新'; });
+  }
+
+  function open(id) {
+    current = id;
+    document.querySelectorAll('#items li').forEach(function (li) { li.classList.toggle('active', li.dataset.id === id); });
+    $('layout').classList.add('detail-open');
+    $('placeholder').textContent = '正在加载邮件内容…';
+    $('placeholder').classList.remove('hidden');
+    $('detail-meta').classList.add('hidden'); $('frame').classList.add('hidden'); $('text').classList.add('hidden'); $('atts').classList.add('hidden');
+    fetch(api + '/messages/' + encodeURIComponent(id), { cache: 'no-store' }).then(function (r) {
+      if (!r.ok) throw new Error(String(r.status));
+      return r.json();
+    }).then(function (m) {
+      if (current !== id) return;
+      $('placeholder').classList.add('hidden');
+      $('detail-meta').classList.remove('hidden');
+      $('d-subject').textContent = m.subject || '（无主题）';
+      $('d-from').textContent = '发件人：' + fromLabel(m.from) + '　收件人：' + m.mailbox;
+      $('d-time').textContent = '时间：' + fmtTime(m.receivedAt);
+      if (m.html) {
+        $('frame').srcdoc = sanitize(m.html);
+        $('frame').classList.remove('hidden');
+      } else {
+        $('text').textContent = m.text || '（空正文）';
+        $('text').classList.remove('hidden');
+      }
+      if (m.attachments && m.attachments.length) {
+        $('atts').innerHTML = '附件：' + m.attachments.map(function (a) {
+          return '<a href="' + esc(a.url) + '" download>' + esc(a.filename) + '</a>（' + Math.round(a.size / 1024) + ' KB）';
+        }).join(' ');
+        $('atts').classList.remove('hidden');
+      }
+    }).catch(function () { $('placeholder').textContent = '邮件已超出可见范围或不存在'; });
+  }
+
+  $('back').addEventListener('click', function () { $('layout').classList.remove('detail-open'); });
+  $('refresh').addEventListener('click', load);
+  $('copy').addEventListener('click', function () {
+    var t = $('mailbox').textContent;
+    if (navigator.clipboard && t && t !== '—') navigator.clipboard.writeText(t).then(function () { $('copy').textContent = '已复制'; setTimeout(function () { $('copy').textContent = '复制'; }, 1500); });
+  });
+  load();
+  setInterval(load, 30000);
+})();
+</script>
+</body>
+</html>

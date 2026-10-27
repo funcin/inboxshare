@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "/Users/funcin/Library/pnpm/bin/pnpm",
+      "runtimeArgs": ["dev"],
+      "port": 8787
+    }
+  ]
+}
