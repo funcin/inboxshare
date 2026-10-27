@@ -23,6 +23,34 @@ Typical use cases include household subscription management where the provider's
 
 > InboxShare does not create disposable mailboxes, generate TOTP codes, bypass verification, or circumvent account-sharing restrictions. It displays emails received through forwarding.
 
+## Streaming verification email use cases
+
+Account owners sometimes receive sign-in codes while authorized family members are using a streaming service. Instead of manually copying and sending each email, the owner can selectively forward verification messages to InboxShare. Authorized viewers can open the shared, read-only URL to check the latest mail.
+
+### Netflix verification codes
+
+If Netflix emails a verification code to the account owner's mailbox, configure a sender-specific forwarding rule to deliver that email to your InboxShare receiving address. Permitted household members can view the message and copy the code from the shared link without waiting for the administrator.
+
+This does not bypass Netflix Household rules, device verification, or other account restrictions.
+
+### Disney+ verification codes
+
+For permitted Disney+ household use, forward relevant sign-in or verification emails to InboxShare. Authorized family members can open the read-only inbox link to find the latest verification message or confirmation link.
+
+InboxShare does not change Disney+'s household or account-sharing requirements.
+
+### HBO Max / Max verification emails
+
+When HBO Max or Max sends an email verification or sign-in message to the account owner, selected messages can be forwarded to the same shared inbox. Authorized members can check the received email through the fixed link.
+
+Email-based authentication flows vary by service, account, and region; InboxShare only displays messages actually received. It does not generate codes or override any service's terms.
+
+### Teams and other services
+
+Teams that are authorized to share an account can use the same workflow for email-based sign-in codes and confirmation messages. Create narrowly scoped forwarding filters to prevent unrelated personal or security-sensitive email from reaching the shared viewer.
+
+**Protect shared links:** A verification code can authorize account access. Only distribute links to trusted, authorized members; keep sensitive-message filtering enabled and revoke links when access is no longer needed.
+
 ## Features
 
 | Feature | Description |
@@ -33,7 +61,7 @@ Typical use cases include household subscription management where the provider's
 | Expiry and revocation | Set link expiration and revoke shared access. |
 | Sensitive email filtering | Password resets, billing, and account-security messages are hidden from viewers by default. |
 | Mobile-friendly UI | Responsive message list and details, refreshed every 30 seconds. |
-| English and Chinese | Set `LOCALE` to `en` or `zh-CN`. |
+| English and Chinese | English by default, with a language switch on admin and shared inbox pages; deployment setting `LOCALE` can be `en` or `zh-CN`. |
 | Cloudflare-based hosting | Uses Email Routing, Workers, D1, R2, and scheduled cleanup. |
 
 ## Architecture
@@ -121,6 +149,12 @@ All deployment options require this step.
 
 You can optionally forward an additional copy to a verified destination using `FORWARD_TO`.
 
+### Language selection
+
+The interface defaults to **English**. On the admin and shared inbox pages, use the **English / 中文** links to switch the UI language. The choice is kept in the page URL using `?lang=en` or `?lang=zh-CN`; it does not change what email is accessible or the original share key. The homepage also provides English (`/en`) and Chinese (`/zh`) versions.
+
+You can configure the deployment default using `LOCALE`.
+
 ### Custom domain and language
 
 Configure your own route and public URL in `wrangler.jsonc`:
@@ -143,7 +177,7 @@ Keep the required resource bindings and other variables from the existing config
 | `RETENTION_DAYS` | `vars` | Days to retain email and attachments; default `30`. |
 | `PUBLIC_BASE_URL` | `vars` | Base URL in share links; defaults to the current request origin if empty. |
 | `FORWARD_TO` | `vars` | Optional additional destination, verified in Cloudflare Email Routing. |
-| `LOCALE` | `vars` | `zh-CN` (default) or `en`. |
+| `LOCALE` | `vars` | `en` (default) or `zh-CN`; visitors can switch languages in the UI. |
 
 A daily scheduled Worker task deletes messages and attachments beyond the retention period.
 
@@ -209,9 +243,9 @@ Create a share link in the admin dashboard and open `/s/<key>` to inspect the re
 - 自动识别邮件中的验证码，支持复制。
 - 可配置链接有效期、撤销链接及邮件可见时间窗口。
 - 密码重置、账单和账号安全邮件默认不对访客展示。
-- 使用 Cloudflare Workers、Email Routing、D1 和 R2 自行部署，支持中文和英文界面。
+- 使用 Cloudflare Workers、Email Routing、D1 和 R2 自行部署，默认英文，管理页面和共享页面可切换中文。
 
-本工具不绕过平台验证机制。账号使用仍需遵守服务提供商的相关条款。部署步骤、配置和安全说明见上面的英文文档。
+典型场景包括 Netflix、Disney+、HBO Max 等服务的验证邮件共享，仅限符合平台规则的授权用户。\n\n本工具不绕过平台验证机制。账号使用仍需遵守服务提供商的相关条款。部署步骤、配置和安全说明见上面的英文文档。
 
 ## License
 
