@@ -9,14 +9,15 @@
   :root { color-scheme: light dark; --bg:#f5f6f8; --card:#fff; --fg:#111827; --muted:#6b7280; --line:#e5e7eb; --accent:#059669; --danger:#b91c1c; }
   @media (prefers-color-scheme: dark) { :root { --bg:#0f1419; --card:#171d26; --fg:#e5e7eb; --muted:#9ca3af; --line:#2a3340; --accent:#34d399; --danger:#f87171; } }
   * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Noto Sans SC",sans-serif; }
-  .wrap { max-width: 960px; margin: 0 auto; padding: 16px; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Noto Sans SC",sans-serif; -webkit-text-size-adjust:100%; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 16px; padding-left:max(16px, env(safe-area-inset-left)); padding-right:max(16px, env(safe-area-inset-right)); }
   h1 { font-size: 20px; margin: 0 0 14px; }
   .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:14px; }
   label { display:block; font-size:13px; color:var(--muted); margin-bottom:4px; }
-  input, select { font:inherit; width:100%; padding:7px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--fg); }
+  /* 16px 起步：iOS 聚焦小于 16px 的输入框会自动放大页面 */
+  input, select { font:inherit; font-size:16px; width:100%; min-height:40px; padding:7px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--fg); }
   .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:end; }
-  button { font:inherit; cursor:pointer; border:1px solid var(--line); background:var(--card); color:var(--fg); border-radius:8px; padding:7px 14px; }
+  button { font:inherit; cursor:pointer; border:1px solid var(--line); background:var(--card); color:var(--fg); border-radius:8px; padding:7px 14px; min-height:38px; -webkit-tap-highlight-color:transparent; }
   button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
   button.danger { color:var(--danger); }
   table { width:100%; border-collapse:collapse; font-size:14px; }
@@ -28,6 +29,19 @@
   .hidden { display:none !important; }
   .tag { font-size:12px; padding:1px 7px; border-radius:999px; border:1px solid var(--line); }
   .tag.active { color:var(--accent); border-color:var(--accent); }
+  td.actions { white-space:nowrap; }
+  @media (max-width: 700px) {
+    /* 窄屏：表格改成一行一张卡片，每个单元格前面带列名 */
+    .grid { grid-template-columns: 1fr; }
+    table, tbody, tr, td { display:block; width:100%; }
+    thead { display:none; }
+    tr { border:1px solid var(--line); border-radius:10px; padding:6px 10px; margin-bottom:10px; }
+    td { display:flex; gap:10px; border:0; padding:5px 0; }
+    td::before { content:attr(data-label); flex:0 0 4em; color:var(--muted); font-size:13px; }
+    td.actions::before { content:none; }
+    td.actions { gap:8px; padding-top:8px; white-space:normal; }
+    td.actions button { flex:1; }
+  }
 </style>
 </head>
 <body>
@@ -98,7 +112,7 @@
   function refresh() {
     req('/api/admin/mailboxes').then(function (r) {
       var rows = r.body.items || [];
-      $('mb-rows').innerHTML = rows.map(function (m) { return '<tr><td><code>' + esc(m.mailbox) + '</code></td><td>' + m.count + '</td><td>' + esc(fmt(m.latest)) + '</td></tr>'; }).join('');
+      $('mb-rows').innerHTML = rows.map(function (m) { return '<tr><td data-label="邮箱"><code>' + esc(m.mailbox) + '</code></td><td data-label="邮件数">' + m.count + '</td><td data-label="最近一封">' + esc(fmt(m.latest)) + '</td></tr>'; }).join('');
       $('mb-empty').classList.toggle('hidden', rows.length > 0);
       $('mailboxes').innerHTML = rows.map(function (m) { return '<option value="' + esc(m.mailbox) + '">'; }).join('');
     });
@@ -106,11 +120,11 @@
       var rows = r.body.items || [];
       $('link-empty').classList.toggle('hidden', rows.length > 0);
       $('link-rows').innerHTML = rows.map(function (l) {
-        return '<tr><td><a href="' + esc(l.url) + '" target="_blank" rel="noopener"><code>/s/' + esc(l.key.slice(0, 8)) + '…</code></a>'
-          + (l.label ? '<div class="muted">' + esc(l.label) + '</div>' : '') + '</td>'
-          + '<td><code>' + esc(l.mailbox) + '</code></td><td>' + win(l.window_minutes) + '</td>'
-          + '<td><span class="tag ' + esc(l.status) + '">' + esc(l.status) + '</span></td><td>' + esc(fmt(l.expires_at)) + '</td>'
-          + '<td>' + (l.status === 'active' ? '<button class="danger" data-revoke="' + esc(l.key) + '">撤销</button> <button data-copy="' + esc(l.url) + '">复制</button>' : '') + '</td></tr>';
+        return '<tr><td data-label="链接"><div><a href="' + esc(l.url) + '" target="_blank" rel="noopener"><code>/s/' + esc(l.key.slice(0, 8)) + '…</code></a>'
+          + (l.label ? '<div class="muted">' + esc(l.label) + '</div>' : '') + '</div></td>'
+          + '<td data-label="邮箱"><code>' + esc(l.mailbox) + '</code></td><td data-label="窗口">' + win(l.window_minutes) + '</td>'
+          + '<td data-label="状态"><span class="tag ' + esc(l.status) + '">' + esc(l.status) + '</span></td><td data-label="过期">' + esc(fmt(l.expires_at)) + '</td>'
+          + '<td class="actions">' + (l.status === 'active' ? '<button class="danger" data-revoke="' + esc(l.key) + '">撤销</button> <button data-copy="' + esc(l.url) + '">复制</button>' : '') + '</td></tr>';
       }).join('');
     });
   }

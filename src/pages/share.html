@@ -11,16 +11,28 @@
   @media (prefers-color-scheme: dark) { :root {
     --bg: #0f1419; --card: #171d26; --fg: #e5e7eb; --muted: #9ca3af; --line: #2a3340; --accent: #34d399; --accent-bg: #0f2a22; --danger: #f87171; } }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Noto Sans SC", sans-serif; }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
-  header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-bottom: 14px; }
-  header h1 { font-size: 18px; margin: 0; }
-  .badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--accent-bg); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
-  .addr { display: inline-flex; align-items: center; gap: 6px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: var(--muted); }
-  button { font: inherit; cursor: pointer; border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 8px; padding: 6px 12px; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Noto Sans SC", sans-serif; -webkit-text-size-adjust: 100%; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+  header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; margin-bottom: 14px; }
+  header h1 { font-size: 18px; margin: 0; white-space: nowrap; }
+  .badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--accent-bg); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); white-space: nowrap; }
+  .addr { display: inline-flex; align-items: center; gap: 6px; min-width: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; color: var(--muted); }
+  .addr #mailbox { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #refresh { margin-left: auto; }
+  button { font: inherit; cursor: pointer; border: 1px solid var(--line); background: var(--card); color: var(--fg); border-radius: 8px; padding: 6px 12px; min-height: 36px; -webkit-tap-highlight-color: transparent; }
   button:hover { border-color: var(--accent); }
   .layout { display: grid; grid-template-columns: 360px 1fr; gap: 14px; }
-  @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } .layout.detail-open .list { display: none; } .layout:not(.detail-open) .detail { display: none; } }
+  @media (max-width: 800px) {
+    /* 手机：头部第二行放地址；列表与详情二选一全屏显示 */
+    .addr { order: 10; flex-basis: 100%; justify-content: space-between; }
+    .layout { grid-template-columns: 1fr; }
+    .layout.detail-open .list { display: none; }
+    .layout:not(.detail-open) .detail { display: none; }
+    .items { max-height: none; }
+    .items li { padding: 14px; }
+    .detail { min-height: 0; }
+    iframe { min-height: 0; height: calc(100dvh - 250px); min-height: 320px; }
+  }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
   .list-head { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); }
   .items { list-style: none; margin: 0; padding: 0; max-height: 75vh; overflow: auto; }
@@ -28,7 +40,8 @@
   .items li:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
   .items li.active { background: var(--accent-bg); }
   .row1 { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--muted); }
-  .from { font-weight: 600; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row1 .time { flex-shrink: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .from { font-weight: 600; color: var(--fg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
   .subject { margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .snippet { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .empty { padding: 40px 14px; text-align: center; color: var(--muted); }
@@ -40,8 +53,8 @@
   @media (max-width: 800px) { .back { display: inline-block; } }
   iframe { flex: 1; width: 100%; min-height: 55vh; border: 0; background: #fff; }
   pre.text { margin: 0; padding: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
-  .atts { padding: 10px 14px; border-top: 1px solid var(--line); font-size: 13px; }
-  .atts a { color: var(--accent); margin-right: 12px; }
+  .atts { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 14px; border-top: 1px solid var(--line); font-size: 13px; }
+  .atts a { color: var(--accent); overflow-wrap: anywhere; }
   .note { font-size: 12px; color: var(--muted); margin-top: 12px; }
   .error { color: var(--danger); }
   .hidden { display: none !important; }
@@ -73,6 +86,7 @@
         <div id="detail-meta" class="hidden">
           <h2 id="d-subject"></h2>
           <div class="meta" id="d-from"></div>
+          <div class="meta" id="d-to"></div>
           <div class="meta" id="d-time"></div>
         </div>
       </div>
@@ -99,6 +113,25 @@
     return '最近 ' + (m / 1440) + ' 天';
   }
   function fmtTime(ms) { return ms ? new Date(ms).toLocaleString('zh-CN', { hour12: false }) : ''; }
+  // 列表里用短时间：今天只显示时分，今年显示月日时分，更早才带年份
+  function fmtShort(ms) {
+    if (!ms) return '';
+    var d = new Date(ms), now = new Date();
+    if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString('zh-CN', { hour12: false, hour: '2-digit', minute: '2-digit' });
+    var opts = { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
+    if (d.getFullYear() !== now.getFullYear()) opts.year = 'numeric';
+    return d.toLocaleString('zh-CN', opts);
+  }
+  var mobile = window.matchMedia('(max-width: 800px)');
+  function openDetailPane() {
+    $('layout').classList.add('detail-open');
+    if (mobile.matches) {
+      window.scrollTo(0, 0);
+      // 手机上把详情记成一条历史，系统返回手势/返回键回到列表而不是离开页面
+      if (!(history.state && history.state.detail)) history.pushState({ detail: true }, '');
+    }
+  }
+  function closeDetailPane() { $('layout').classList.remove('detail-open'); }
   function fromLabel(f) {
     if (!f) return '未知发件人';
     if (f.name && f.address) return f.name + ' <' + f.address + '>';
@@ -146,7 +179,7 @@
       var li = document.createElement('li');
       li.dataset.id = m.id;
       if (current === m.id) li.classList.add('active');
-      li.innerHTML = '<div class="row1"><span class="from">' + esc(fromLabel(m.from)) + '</span><span>' + esc(fmtTime(m.receivedAt)) + '</span></div>'
+      li.innerHTML = '<div class="row1"><span class="from">' + esc(fromLabel(m.from)) + '</span><span class="time" title="' + esc(fmtTime(m.receivedAt)) + '">' + esc(fmtShort(m.receivedAt)) + '</span></div>'
         + '<div class="subject">' + esc(m.subject || '（无主题）') + (m.attachmentCount ? ' 📎' : '') + '</div>'
         + '<div class="snippet">' + esc(m.snippet || '') + '</div>';
       li.addEventListener('click', function () { open(m.id); });
@@ -164,7 +197,7 @@
   function open(id) {
     current = id;
     document.querySelectorAll('#items li').forEach(function (li) { li.classList.toggle('active', li.dataset.id === id); });
-    $('layout').classList.add('detail-open');
+    openDetailPane();
     $('placeholder').textContent = '正在加载邮件内容…';
     $('placeholder').classList.remove('hidden');
     $('detail-meta').classList.add('hidden'); $('frame').classList.add('hidden'); $('text').classList.add('hidden'); $('atts').classList.add('hidden');
@@ -176,7 +209,8 @@
       $('placeholder').classList.add('hidden');
       $('detail-meta').classList.remove('hidden');
       $('d-subject').textContent = m.subject || '（无主题）';
-      $('d-from').textContent = '发件人：' + fromLabel(m.from) + '　收件人：' + m.mailbox;
+      $('d-from').textContent = '发件人：' + fromLabel(m.from);
+      $('d-to').textContent = '收件人：' + m.mailbox;
       $('d-time').textContent = '时间：' + fmtTime(m.receivedAt);
       if (m.html) {
         $('frame').srcdoc = sanitize(m.html);
@@ -194,7 +228,10 @@
     }).catch(function () { $('placeholder').textContent = '邮件已超出可见范围或不存在'; });
   }
 
-  $('back').addEventListener('click', function () { $('layout').classList.remove('detail-open'); });
+  $('back').addEventListener('click', function () {
+    if (history.state && history.state.detail) history.back(); else closeDetailPane();
+  });
+  window.addEventListener('popstate', closeDetailPane);
   $('refresh').addEventListener('click', load);
   $('copy').addEventListener('click', function () {
     var t = $('mailbox').textContent;
