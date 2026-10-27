@@ -11,10 +11,11 @@
 - [x] 定时清理：按 RETENTION_DAYS 删 D1 + R2
 - [x] 本地验证：真实投递 sample.eml、API 全链路、浏览器渲染
 - [x] 线上资源：D1、R2、远程迁移、ADMIN_TOKEN secret（2026-10-27 完成）
-- [ ] 线上接入：推 GitHub → Workers Builds 接仓库 → Email Routing 指向 Worker → 发测试邮件验证（需站长在 Dashboard 操作）
+- [x] 推 GitHub（funcin/emailshare）→ Workers Builds 接仓库 → 首次构建失败（未锁 pnpm/Node 版本）→ 锁定后成功，线上 https://emailshare.funcin.workers.dev 管理接口验证通过（2026-10-27）
+- [ ] Email Routing 把共享地址指向 Worker `emailshare` → 发测试邮件 → /admin 建链接 → 无痕窗口验证 /s/<key>
 
 ## 进度
-2026-10-27 本地全链路通过（见 README「本地开发」）。
+2026-10-27 本地全链路通过；线上 Worker 部署成功，等 Email Routing 接入。
 
 ## 审查
 - 页面只读，HTML 在浏览器端消毒 + sandbox iframe + srcdoc CSP；附件强制下载。
