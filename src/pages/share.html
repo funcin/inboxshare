@@ -120,6 +120,7 @@
 </style>
 </head>
 <body>
+<nav aria-label="Language" style="display:flex;justify-content:flex-end;gap:12px;padding:10px 18px;font-size:13px"><a id="switch-en" href="?lang=en">English</a><a id="switch-zh" href="?lang=zh-CN">中文</a></nav><script>for(const [id,lang] of [['switch-en','en'],['switch-zh','zh-CN']]) { const a=document.getElementById(id);const u=new URL(location.href);u.searchParams.set('lang',lang);a.href=u.pathname+u.search; if(document.documentElement.lang===lang) a.setAttribute('aria-current','page'); }</script>
 <header>
   <div class="bar">
     <div class="brand">
