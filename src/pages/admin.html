@@ -29,7 +29,10 @@
   .hidden { display:none !important; }
   .tag { font-size:12px; padding:1px 7px; border-radius:999px; border:1px solid var(--line); }
   .tag.active { color:var(--accent); border-color:var(--accent); }
+  .tag.warn { color:var(--danger); border-color:var(--danger); margin-left:6px; }
   td.actions { white-space:nowrap; }
+  label.check { display:flex; align-items:center; gap:8px; margin-top:12px; font-size:14px; color:var(--fg); cursor:pointer; }
+  label.check input { width:18px; height:18px; min-height:0; margin:0; }
   @media (max-width: 700px) {
     /* 窄屏：表格改成一行一张卡片，每个单元格前面带列名 */
     .grid { grid-template-columns: 1fr; }
@@ -68,6 +71,8 @@
         <div><label for="label">{{label}}</label><input id="label" placeholder="{{labelPlaceholder}}"></div>
         <div><button class="primary" id="create">{{create}}</button></div>
       </div>
+      <label class="check" for="sensitive"><input type="checkbox" id="sensitive"> <span>{{showSensitive}}</span></label>
+      <div class="muted" style="margin-top:2px">{{showSensitiveHint}}</div>
       <div class="err hidden" id="create-err"></div>
       <div class="muted" id="created" style="margin-top:10px"></div>
     </div>
@@ -132,7 +137,7 @@
       $('link-rows').innerHTML = rows.map(function (l) {
         return '<tr><td data-label="' + esc(T.thLink) + '"><div><a href="' + esc(l.url) + '" target="_blank" rel="noopener"><code>/s/' + esc(l.key.slice(0, 8)) + '…</code></a>'
           + (l.label ? '<div class="muted">' + esc(l.label) + '</div>' : '') + '</div></td>'
-          + '<td data-label="' + esc(T.thMailbox) + '"><code>' + esc(l.mailbox) + '</code></td><td data-label="' + esc(T.thWindow) + '">' + esc(win(l.window_minutes)) + '</td>'
+          + '<td data-label="' + esc(T.thMailbox) + '"><code>' + esc(l.mailbox) + '</code></td><td data-label="' + esc(T.thWindow) + '">' + esc(win(l.window_minutes)) + (l.show_sensitive ? ' <span class="tag warn">' + esc(T.tagSensitive) + '</span>' : '') + '</td>'
           + '<td data-label="' + esc(T.thStatus) + '"><span class="tag ' + esc(l.status) + '">' + esc(statusLabel(l.status)) + '</span></td><td data-label="' + esc(T.thExpires) + '">' + esc(fmt(l.expires_at)) + '</td>'
           + '<td class="actions">' + (l.status === 'active' ? '<button class="danger" data-revoke="' + esc(l.key) + '">' + esc(T.revoke) + '</button> <button data-copy="' + esc(l.url) + '">' + esc(T.copy) + '</button>' : '') + '</td></tr>';
       }).join('');
@@ -145,7 +150,7 @@
   $('create').addEventListener('click', function () {
     $('create-err').classList.add('hidden');
     var expires = $('expires').value ? new Date($('expires').value).toISOString() : null;
-    req('/api/admin/links', { method: 'POST', body: JSON.stringify({ mailbox: $('mailbox').value, windowMinutes: Number($('window').value), expiresAt: expires, label: $('label').value }) })
+    req('/api/admin/links', { method: 'POST', body: JSON.stringify({ mailbox: $('mailbox').value, windowMinutes: Number($('window').value), expiresAt: expires, label: $('label').value, showSensitive: $('sensitive').checked }) })
       .then(function (r) {
         if (!r.ok) { $('create-err').textContent = tpl(T.createFailed, { reason: errorLabel(r.body.error || r.status) }); $('create-err').classList.remove('hidden'); return; }
         $('created').innerHTML = esc(T.created) + '<a href="' + esc(r.body.link.url) + '" target="_blank" rel="noopener">' + esc(r.body.link.url) + '</a>';

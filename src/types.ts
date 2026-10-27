@@ -33,6 +33,8 @@ export interface MessageRow {
   attachments_json: string;
   /** 入库时识别出的验证码，没有则 null */
   code: string | null;
+  /** code | reset | billing | security | other */
+  category: string;
 }
 
 export interface MessageListRow {
@@ -44,6 +46,7 @@ export interface MessageListRow {
   snippet: string | null;
   attachments_json: string;
   code: string | null;
+  category: string;
 }
 
 export type LinkStatus = 'active' | 'revoked' | 'expired';
@@ -57,6 +60,8 @@ export interface ShareLinkRow {
   status: LinkStatus;
   created_at: number;
   revoked_at: number | null;
+  /** 1 = 这条链接也显示密码重置/账单/账户安全类邮件；默认 0 */
+  show_sensitive: number;
 }
 
 /** 允许的时间窗口（分钟）；0 = 不限（仍受保留天数约束） */

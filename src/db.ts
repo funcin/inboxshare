@@ -4,8 +4,8 @@ export async function insertMessage(db: D1Database, row: MessageRow): Promise<vo
   await db
     .prepare(
       `INSERT INTO messages (id, mailbox, from_address, from_name, subject, received_at,
-         text_body, html_body, html_r2_key, size, attachments_json, code)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)`,
+         text_body, html_body, html_r2_key, size, attachments_json, code, category)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)`,
     )
     .bind(
       row.id,
@@ -20,28 +20,45 @@ export async function insertMessage(db: D1Database, row: MessageRow): Promise<vo
       row.size,
       row.attachments_json,
       row.code,
+      row.category,
     )
     .run();
 }
+
+/** 敏感类在 SQL 里的过滤条件：showSensitive=1 时放行全部 */
+const SENSITIVE_FILTER = `(?4 = 1 OR category NOT IN ('reset', 'billing', 'security'))`;
 
 export async function listMessages(
   db: D1Database,
   mailbox: string,
   sinceMs: number,
+  showSensitive: boolean,
   limit = 100,
 ): Promise<MessageListRow[]> {
   const { results } = await db
     .prepare(
       `SELECT id, from_address, from_name, subject, received_at,
-              substr(text_body, 1, 200) AS snippet, attachments_json, code
+              substr(text_body, 1, 200) AS snippet, attachments_json, code, category
        FROM messages
-       WHERE mailbox = ?1 AND received_at >= ?2
+       WHERE mailbox = ?1 AND received_at >= ?2 AND ${SENSITIVE_FILTER}
        ORDER BY received_at DESC
        LIMIT ?3`,
     )
-    .bind(mailbox, sinceMs, limit)
+    .bind(mailbox, sinceMs, limit, showSensitive ? 1 : 0)
     .all<MessageListRow>();
   return results;
+}
+
+/** 当前窗口内被隐藏的敏感邮件数量，分享页用来提示“还有 N 封未显示” */
+export async function countHiddenSensitive(db: D1Database, mailbox: string, sinceMs: number): Promise<number> {
+  const row = await db
+    .prepare(
+      `SELECT COUNT(*) AS n FROM messages
+       WHERE mailbox = ?1 AND received_at >= ?2 AND category IN ('reset', 'billing', 'security')`,
+    )
+    .bind(mailbox, sinceMs)
+    .first<{ n: number }>();
+  return row?.n ?? 0;
 }
 
 export async function getMessage(
@@ -49,10 +66,11 @@ export async function getMessage(
   id: string,
   mailbox: string,
   sinceMs: number,
+  showSensitive: boolean,
 ): Promise<MessageRow | null> {
   return db
-    .prepare(`SELECT * FROM messages WHERE id = ?1 AND mailbox = ?2 AND received_at >= ?3`)
-    .bind(id, mailbox, sinceMs)
+    .prepare(`SELECT * FROM messages WHERE id = ?1 AND mailbox = ?2 AND received_at >= ?3 AND ${SENSITIVE_FILTER}`)
+    .bind(id, mailbox, sinceMs, showSensitive ? 1 : 0)
     .first<MessageRow>();
 }
 
@@ -70,8 +88,8 @@ export async function listLinks(db: D1Database): Promise<ShareLinkRow[]> {
 export async function createLink(db: D1Database, link: ShareLinkRow): Promise<void> {
   await db
     .prepare(
-      `INSERT INTO share_links (key, mailbox, label, window_minutes, expires_at, status, created_at, revoked_at)
-       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, NULL)`,
+      `INSERT INTO share_links (key, mailbox, label, window_minutes, expires_at, status, created_at, revoked_at, show_sensitive)
+       VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, NULL, ?8)`,
     )
     .bind(
       link.key,
@@ -81,6 +99,7 @@ export async function createLink(db: D1Database, link: ShareLinkRow): Promise<vo
       link.expires_at,
       link.status,
       link.created_at,
+      link.show_sensitive,
     )
     .run();
 }

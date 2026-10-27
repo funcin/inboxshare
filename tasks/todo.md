@@ -43,4 +43,5 @@
 - 否决：OTPLink（OTP 易被理解为短信验证码）、InboxLink（.com/.app 已被占且 .app 一个月前刚被注册）、emailcodeshare（描述性太强、无品牌感，仅作备选）。
 - 品牌词只出现在显示层（标题、README、Logo）。硬标识（GitHub 组织、仓库、域名、Worker 名）一旦定下不再随品牌变动。
 - 待办（站长）：注册 inboxshare.app → 把域名接入 Cloudflare → 建 GitHub 组织 `inboxshare`。
-- 待办（Claude）：仓库迁到 `inboxshare/inboxshare`、Worker 加 inboxshare.app 自定义域名、PUBLIC_BASE_URL 改新域名、README/CLAUDE.md 换品牌、开源发布前三件事（敏感邮件隔离、一键部署、去硬编码）。
+- 2026-10-28 开源前整改完成：敏感邮件分类与隔离（迁移 0003，链接 show_sensitive）、Deploy 按钮 + fork 即部署 Actions + `pnpm run deploy`、wrangler.jsonc 顶层通用化（作者实例移到 env.production）、README/CLAUDE.md 换品牌 InboxShare。代码推到 `funcin/inboxshare`（站长已建）。
+- 待办（站长）：Cloudflare Worker `emailshare` → Settings → Build：把 Git 仓库切到 `funcin/inboxshare`，部署命令改成 `pnpm run deploy:production`；之后归档旧仓库 `funcin/emailshare`。域名 inboxshare.app 注册后再加路由。

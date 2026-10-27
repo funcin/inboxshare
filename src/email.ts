@@ -1,4 +1,5 @@
 import PostalMime from 'postal-mime';
+import { classify } from './classify';
 import { detectCode } from './code';
 import { insertMessage } from './db';
 import type { AttachmentMeta, Env } from './types';
@@ -58,6 +59,7 @@ export async function handleEmail(message: ForwardableEmailMessage, env: Env, ct
     html = null;
   }
   const text = parsed.text ? parsed.text.slice(0, MAX_TEXT_BODY) : null;
+  const code = detectCode(parsed.subject ?? null, text);
 
   await insertMessage(env.DB, {
     id,
@@ -71,7 +73,8 @@ export async function handleEmail(message: ForwardableEmailMessage, env: Env, ct
     html_r2_key: htmlR2Key,
     size: raw.byteLength,
     attachments_json: JSON.stringify(metas),
-    code: detectCode(parsed.subject ?? null, text),
+    code,
+    category: classify(parsed.subject ?? null, text, code !== null),
   });
 
   // 可选：同时转发一份到真实邮箱（目标必须在 Email Routing 里验证过）

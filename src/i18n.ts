@@ -43,6 +43,7 @@ const zhCN = {
   justNow: '刚刚',
   minAgo: '{n} 分钟前',
   yesterday: '昨天',
+  hiddenSensitive: '{n} 封敏感邮件未显示（密码重置、账单、账户安全类默认不共享）',
 };
 
 const en: typeof zhCN = {
@@ -79,6 +80,7 @@ const en: typeof zhCN = {
   justNow: 'just now',
   minAgo: '{n} min ago',
   yesterday: 'Yesterday',
+  hiddenSensitive: '{n} sensitive messages hidden (password resets, billing and account security are not shared by default)',
 };
 
 export type Dict = typeof zhCN;
@@ -132,6 +134,9 @@ const adminZhCN = {
   errInvalidWindow: '时间窗口不在允许范围内',
   errInvalidExpires: '过期时间格式不对',
   errExpiresPast: '过期时间必须在未来',
+  showSensitive: '也显示敏感邮件',
+  showSensitiveHint: '密码重置、账单、账户安全类邮件默认不出现在分享页。只在你确定链接只给自己人时打开。',
+  tagSensitive: '含敏感邮件',
 };
 
 const adminEn: typeof adminZhCN = {
@@ -181,6 +186,9 @@ const adminEn: typeof adminZhCN = {
   errInvalidWindow: 'That time window is not allowed',
   errInvalidExpires: 'That expiry date is not valid',
   errExpiresPast: 'The expiry must be in the future',
+  showSensitive: 'Also show sensitive messages',
+  showSensitiveHint: 'Password resets, billing and account-security emails are hidden from share pages by default. Enable only for links you give to people you fully trust.',
+  tagSensitive: 'includes sensitive',
 };
 
 export type AdminDict = typeof adminZhCN;

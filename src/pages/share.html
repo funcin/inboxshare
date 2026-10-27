@@ -55,6 +55,7 @@
   .coderow { display: flex; align-items: center; gap: 8px; min-width: 0; }
   .chip-code { flex: 0 0 auto; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; background: var(--card); border: 1px solid var(--accent-line); border-radius: 6px; padding: 1px 8px; }
   .empty { padding: 40px 16px; text-align: center; color: var(--muted); }
+  .hidden-note { padding: 10px 16px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--line-soft); }
 
   .detail { display: flex; flex-direction: column; min-height: 60vh; }
   .detail-head { padding: 20px 24px 16px; border-bottom: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 12px; }
@@ -102,6 +103,7 @@
     .avatar { flex-basis: 40px; width: 40px; height: 40px; font-size: 15px; }
     .chip-code { font-size: 15px; letter-spacing: 0.1em; padding: 3px 10px; border-radius: 8px; background: var(--accent-soft); }
     .empty { background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+    .hidden-note { border: 0; padding: 6px 6px 0; }
     .back { display: inline-flex; min-height: 32px; }
     .detail { min-height: 0; }
     .detail-head { padding: 14px 16px; }
@@ -143,6 +145,7 @@
     <ul class="items" id="items"></ul>
     <div class="empty hidden" id="empty">{{empty}}</div>
     <div class="empty" id="loading">{{loading}}</div>
+    <div class="hidden-note hidden" id="hidden-note"></div>
   </section>
 
   <section class="card detail" aria-live="polite">
@@ -282,6 +285,9 @@
     $('count').textContent = fmt(T.countFmt, { n: data.items.length }) + ' · ' + T.autoRefresh;
     $('loading').classList.add('hidden');
     $('empty').classList.toggle('hidden', data.items.length > 0);
+    var hiddenN = data.hiddenSensitive || 0;
+    $('hidden-note').textContent = hiddenN ? fmt(T.hiddenSensitive, { n: hiddenN }) : '';
+    $('hidden-note').classList.toggle('hidden', !hiddenN);
     var ul = $('items'); ul.innerHTML = '';
     data.items.forEach(function (m) {
       var li = document.createElement('li');

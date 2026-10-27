@@ -7,9 +7,13 @@
     "dev": "wrangler dev",
     "types": "wrangler types --include-env=false",
     "typecheck": "tsc --noEmit",
+    "test:classify": "node --experimental-strip-types scripts/test-classify.mts",
+    "test:email": "bash scripts/send-test-email.sh",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
-    "test:email": "bash scripts/send-test-email.sh"
+    "db:migrate:production": "wrangler d1 migrations apply DB --remote --env production",
+    "deploy": "wrangler d1 migrations apply DB --remote && wrangler deploy",
+    "deploy:production": "wrangler d1 migrations apply DB --remote --env production && wrangler deploy --env production"
   },
   "dependencies": {
     "hono": "^4.6.0",

@@ -12,6 +12,8 @@ interface CreateLinkBody {
   label?: string;
   windowMinutes?: number;
   expiresAt?: string | null;
+  /** 是否也显示密码重置/账单/账户安全类邮件；默认 false */
+  showSensitive?: boolean;
 }
 
 function publicBase(env: Env, requestUrl: string): string {
@@ -90,6 +92,7 @@ export function registerAdminRoutes(app: App): void {
       status: 'active',
       created_at: Date.now(),
       revoked_at: null,
+      show_sensitive: body.showSensitive === true ? 1 : 0,
     };
     await createLink(c.env.DB, link);
     return c.json({ link: withUrl(link, publicBase(c.env, c.req.url)) }, 201);

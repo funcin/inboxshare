@@ -1,35 +1,24 @@
 {
   // 只读共享收件箱：Cloudflare Email Routing → 本 Worker 收信入库 → /s/<key> 只读页面
   // 密钥不要写在这里：ADMIN_TOKEN 用 `wrangler secret put ADMIN_TOKEN`（本地用 .dev.vars）
+  //
+  // 顶层配置是通用模板，fork 后直接可用：
+  //   - D1 / R2 没写 id，`wrangler deploy` 会自动创建同名资源（Deploy to Cloudflare 按钮同理）
+  //   - 想绑自定义域名、改语言，照着下面 env.production 的写法加一个你自己的环境
+  // env.production 是本仓库作者自己的实例，fork 后删掉或改成你的。
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "emailshare",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat"],
 
-  // 分享链接用的自定义域名；custom_domain 让 Cloudflare 在部署时自动建 DNS 记录和证书
-  "routes": [{ "pattern": "mail.funcin.de", "custom_domain": true }],
-
   // 把 .html 当字符串 import（页面模板）
   "rules": [{ "type": "Text", "globs": ["**/*.html"], "fallthrough": false }],
 
   "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "shared-inbox",
-      // 2026-10-27 用 `wrangler d1 create shared-inbox` 创建（region WNAM）
-      "database_id": "4e782588-1aef-4ba7-9150-2a1de0f5a6d4",
-      "migrations_dir": "migrations"
-    }
+    { "binding": "DB", "database_name": "shared-inbox", "migrations_dir": "migrations" }
   ],
-
-  "r2_buckets": [
-    {
-      "binding": "ATTACHMENTS",
-      // 2026-10-27 用 `wrangler r2 bucket create shared-inbox-attachments` 创建
-      "bucket_name": "shared-inbox-attachments"
-    }
-  ],
+  "r2_buckets": [{ "binding": "ATTACHMENTS", "bucket_name": "shared-inbox-attachments" }],
 
   // 每天清理超过 RETENTION_DAYS 的邮件及其附件
   "triggers": { "crons": ["17 3 * * *"] },
@@ -38,12 +27,36 @@
     // 邮件保留天数（超过即删，含 R2 附件）
     "RETENTION_DAYS": "30",
     // 生成分享链接时用的站点地址，留空则用请求自身的 origin
-    "PUBLIC_BASE_URL": "https://mail.funcin.de",
+    "PUBLIC_BASE_URL": "",
     // 可选：收到的邮件同时转发一份到这个地址（必须是 Email Routing 里已验证的目标地址）
     "FORWARD_TO": "",
-    // 分享页语言：zh-CN | en
+    // 分享页与管理页语言：zh-CN | en
     "LOCALE": "zh-CN"
   },
 
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+
+  "env": {
+    // 作者实例：Workers Builds 的部署命令是 `pnpm run deploy:production`
+    "production": {
+      "name": "emailshare",
+      "routes": [{ "pattern": "mail.funcin.de", "custom_domain": true }],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "shared-inbox",
+          "database_id": "4e782588-1aef-4ba7-9150-2a1de0f5a6d4",
+          "migrations_dir": "migrations"
+        }
+      ],
+      "r2_buckets": [{ "binding": "ATTACHMENTS", "bucket_name": "shared-inbox-attachments" }],
+      "triggers": { "crons": ["17 3 * * *"] },
+      "vars": {
+        "RETENTION_DAYS": "30",
+        "PUBLIC_BASE_URL": "https://mail.funcin.de",
+        "FORWARD_TO": "",
+        "LOCALE": "zh-CN"
+      }
+    }
+  }
 }

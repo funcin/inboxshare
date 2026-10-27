@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { getLink, getMessage, listMessages } from '../db';
+import { countHiddenSensitive, getLink, getMessage, listMessages } from '../db';
 import { attachmentKey } from '../email';
 import { DICTS, renderPage, resolveLocale } from '../i18n';
 import { retentionDays } from '../cleanup';
@@ -48,12 +48,18 @@ export function registerPublicRoutes(app: App): void {
     const link = await resolveLink(c.env.DB, c.req.param('key'));
     if (!link) return c.json({ error: 'denied' }, 403);
 
-    const rows = await listMessages(c.env.DB, link.mailbox, windowStart(link));
+    const since = windowStart(link);
+    const showSensitive = link.show_sensitive === 1;
+    const [rows, hiddenSensitive] = await Promise.all([
+      listMessages(c.env.DB, link.mailbox, since, showSensitive),
+      showSensitive ? Promise.resolve(0) : countHiddenSensitive(c.env.DB, link.mailbox, since),
+    ]);
     return c.json({
       mailbox: link.mailbox,
       label: link.label,
       windowMinutes: link.window_minutes,
       expiresAt: link.expires_at,
+      hiddenSensitive,
       items: rows.map((r) => ({
         id: r.id,
         from: { address: r.from_address, name: r.from_name },
@@ -61,6 +67,7 @@ export function registerPublicRoutes(app: App): void {
         receivedAt: r.received_at,
         snippet: r.snippet,
         code: r.code,
+        category: r.category,
         attachmentCount: parseAttachments(r.attachments_json).length,
       })),
     });
@@ -71,7 +78,7 @@ export function registerPublicRoutes(app: App): void {
     const link = await resolveLink(c.env.DB, key);
     if (!link) return c.json({ error: 'denied' }, 403);
 
-    const msg = await getMessage(c.env.DB, c.req.param('id'), link.mailbox, windowStart(link));
+    const msg = await getMessage(c.env.DB, c.req.param('id'), link.mailbox, windowStart(link), link.show_sensitive === 1);
     if (!msg) return c.json({ error: 'not_found' }, 404);
 
     let html = msg.html_body;
@@ -90,6 +97,7 @@ export function registerPublicRoutes(app: App): void {
       subject: msg.subject,
       receivedAt: msg.received_at,
       code: msg.code,
+      category: msg.category,
       html,
       text: msg.text_body,
       attachments,
@@ -100,7 +108,7 @@ export function registerPublicRoutes(app: App): void {
     const link = await resolveLink(c.env.DB, c.req.param('key'));
     if (!link) return c.json({ error: 'denied' }, 403);
 
-    const msg = await getMessage(c.env.DB, c.req.param('id'), link.mailbox, windowStart(link));
+    const msg = await getMessage(c.env.DB, c.req.param('id'), link.mailbox, windowStart(link), link.show_sensitive === 1);
     if (!msg) return c.json({ error: 'not_found' }, 404);
 
     const n = Number(c.req.param('n'));
