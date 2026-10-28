@@ -178,6 +178,8 @@ Keep the required resource bindings and other variables from the existing config
 | `PUBLIC_BASE_URL` | `vars` | Base URL in share links; defaults to the current request origin if empty. |
 | `FORWARD_TO` | `vars` | Optional additional destination, verified in Cloudflare Email Routing. |
 | `LOCALE` | `vars` | `en` (default) or `zh-CN`; visitors can switch languages in the UI. |
+| `WAITLIST_FROM` | `vars` | Optional. The landing page has a "hosted version" email signup stored in the D1 `waitlist` table. To also get an email per signup, set this sender address on your domain, add a `send_email` binding named `EMAIL`, and store the recipient with `wrangler secret put WAITLIST_TO` (it must be a verified Email Routing destination). Leave unset to store only. |
+| `WAITLIST_TO` | secret | Recipient for waitlist notifications; see `WAITLIST_FROM`. |
 
 A daily scheduled Worker task deletes messages and attachments beyond the retention period.
 

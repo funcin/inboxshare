@@ -48,6 +48,9 @@
 
 2026-10-28 站长定：备注不进 key。key 最终格式 = `邮箱用户名 + 序号字母 + 10 位随机`（`hiAK7qM2xP9aB`），`buildShareKey(mailbox, existingCount)`。
 
+2026-10-28 首页加「想要托管版？留下邮箱」（付费意愿测试）：`#hosted` 区块，只收邮箱，前端 fetch `POST /api/waitlist`（CSP form-action 'none'，不能走原生表单），蜜罐字段 `website`。服务端校验后 `INSERT OR IGNORE` 进 D1 新表 `waitlist`（迁移 0004），新记录才通知。通知走 Cloudflare `send_email` 绑定 `EMAIL`（`src/waitlist.ts`，纯文本 MIME，失败只记日志），收件人 `WAITLIST_TO`、发件人 `WAITLIST_FROM`，作者实例配置在 env.production（收件 9206660@gmail.com，发件 noreply@inboxshare.app）；顶层模板三者留空 = 只落库不发信。站长决定不做管理页名单视图，直接看邮件。本地中英文、桌面手机渲染 + 提交流程（无效 / 成功 / 按钮恢复）验证通过；本地没有 EMAIL 绑定，发信只能在线上验证。
+  前提：9206660@gmail.com 必须是 Cloudflare Email Routing 里已验证的目标地址，发件域 inboxshare.app 需在 Email 服务里可用，否则 send 报 E_RECIPIENT_NOT_ALLOWED / E_SENDER_NOT_VERIFIED，名单仍会落库。
+
 未做（可选）：`/api/s/*` 的 Rate Limiting 规则；`FORWARD_TO` 目前为空，共享地址的邮件只进共享收件箱不转发。
 
 ## 审查

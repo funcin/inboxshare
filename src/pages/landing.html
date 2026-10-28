@@ -178,6 +178,17 @@
   .cta pre { margin: 0; background: var(--is-dark-bg); color: var(--is-dark-text); border-radius: 10px; padding: 16px 18px; font-size: 13px; line-height: 1.7; overflow-x: auto; }
   .cta .btns { display: flex; gap: 12px; flex-wrap: wrap; }
 
+  .wait { display: flex; gap: 12px; flex-wrap: wrap; }
+  .wait input[type="email"] { flex: 1 1 260px; min-height: 48px; padding: 0 14px; border: 1px solid var(--is-line-strong); border-radius: 10px; background: var(--is-surface); color: var(--is-ink); font: inherit; font-size: 16px; }
+  .wait input[type="email"]:focus { outline: none; border-color: var(--is-accent); box-shadow: 0 0 0 3px var(--is-accent-tint); }
+  .wait input.invalid { border-color: #B3261E; }
+  .wait button { border: 0; font: inherit; cursor: pointer; min-height: 48px; padding: 0 22px; }
+  .wait button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .wait .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .wait-note { margin-top: 12px; font-size: 14px; }
+  .wait-note.ok { color: var(--is-ok); font-weight: 600; }
+  .wait-note.err { color: #B3261E; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   footer { border-top: 1px solid var(--is-line); }
   footer .wrap { padding-top: 32px; padding-bottom: 48px; display: flex; flex-wrap: wrap; gap: 24px; align-items: center; font-size: 14px; color: var(--is-muted); }
   footer .brand { font-size: 15px; }
@@ -362,6 +373,25 @@
     </div>
   </section>
 
+  <section id="hosted" class="band ground">
+    <div class="wrap split">
+      <div class="intro">
+        <div class="eyebrow">{{waitEyebrow}}</div>
+        <h2>{{waitTitle}}</h2>
+        <p>{{waitSub}}</p>
+      </div>
+      <div class="side">
+        <form id="waitlist" class="wait" novalidate data-done="{{waitDone}}" data-invalid="{{waitInvalid}}" data-failed="{{waitFailed}}" data-sending="{{waitSending}}" data-button="{{waitButton}}" data-note="{{waitNote}}" data-locale="{{htmlLang}}">
+          <label for="wl-email" class="sr-only">{{waitPlaceholder}}</label>
+          <input id="wl-email" type="email" name="email" placeholder="{{waitPlaceholder}}" autocomplete="email" inputmode="email" required>
+          <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button type="submit" class="btn primary">{{waitButton}}</button>
+        </form>
+        <p class="wait-note" id="wl-msg" aria-live="polite">{{waitNote}}</p>
+      </div>
+    </div>
+  </section>
+
   <section class="band" style="border-bottom: 0">
     <div class="wrap">
       <div class="cta">
@@ -391,5 +421,26 @@ $ pnpm run deploy</pre>
     <span class="langs"><a href="/en" hreflang="en" data-lang="en">English</a><a href="/zh" hreflang="zh-CN" data-lang="zh-CN">中文</a></span>
   </div>
 </footer>
+<script>
+(function () {
+  // 托管版意向名单：只收邮箱，POST 到自家 /api/waitlist（CSP form-action 'none'，必须走 fetch）
+  var f = document.getElementById('waitlist');
+  if (!f) return;
+  var d = f.dataset, msg = document.getElementById('wl-msg'), btn = f.querySelector('button'), inp = document.getElementById('wl-email');
+  function say(text, cls) { msg.textContent = text; msg.className = 'wait-note' + (cls ? ' ' + cls : ''); }
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = inp.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { inp.classList.add('invalid'); say(d.invalid, 'err'); inp.focus(); return; }
+    inp.classList.remove('invalid');
+    btn.disabled = true; btn.textContent = d.sending;
+    fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, locale: d.locale, website: f.elements.website.value }) })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+      .then(function () { say(d.done, 'ok'); inp.value = ''; })
+      .catch(function (status) { say(status === 400 ? d.invalid : d.failed, 'err'); })
+      .then(function () { btn.disabled = false; btn.textContent = d.button; });
+  });
+})();
+</script>
 </body>
 </html>

@@ -124,6 +124,21 @@ export async function deleteLink(db: D1Database, key: string): Promise<boolean> 
   return (res.meta.changes ?? 0) > 0;
 }
 
+export interface WaitlistRow {
+  email: string;
+  locale: string;
+  created_at: number;
+}
+
+/** 托管版意向名单：同一邮箱只记一次；返回是否为新记录（重复提交不再发通知） */
+export async function addWaitlist(db: D1Database, email: string, locale: string, now: number): Promise<boolean> {
+  const res = await db
+    .prepare(`INSERT OR IGNORE INTO waitlist (email, locale, created_at) VALUES (?1, ?2, ?3)`)
+    .bind(email, locale, now)
+    .run();
+  return (res.meta.changes ?? 0) > 0;
+}
+
 export async function listMailboxes(
   db: D1Database,
 ): Promise<Array<{ mailbox: string; count: number; latest: number }>> {

@@ -34,7 +34,11 @@
     // 可选：收到的邮件同时转发一份到这个地址（必须是 Email Routing 里已验证的目标地址）
     "FORWARD_TO": "",
     // 分享页与管理页语言：zh-CN | en
-    "LOCALE": "en"
+    "LOCALE": "en",
+    // 可选：首页“想要托管版”名单的邮件通知。要发信需要三样：send_email 绑定（见 env.production）、
+    // 发件地址 WAITLIST_FROM（你域名下的地址）、收件地址 WAITLIST_TO（用 `wrangler secret put WAITLIST_TO` 存，
+    // 必须是 Email Routing 里已验证的目标地址）。缺任何一样则名单只存 D1 的 waitlist 表，不发信。
+    "WAITLIST_FROM": ""
   },
 
   "observability": { "enabled": true },
@@ -59,11 +63,14 @@
       "r2_buckets": [{ "binding": "ATTACHMENTS", "bucket_name": "shared-inbox-attachments" }],
       "triggers": { "crons": ["17 3 * * *"] },
       "assets": { "directory": "./public" },
+      // 名单通知的发信绑定；收件人在 secret WAITLIST_TO 里，不写在这里
+      "send_email": [{ "name": "EMAIL" }],
       "vars": {
         "RETENTION_DAYS": "30",
         "PUBLIC_BASE_URL": "https://inboxshare.app",
         "FORWARD_TO": "",
-        "LOCALE": "en"
+        "LOCALE": "en",
+        "WAITLIST_FROM": "noreply@inboxshare.app"
       }
     }
   }

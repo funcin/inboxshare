@@ -1,2 +1,4 @@
 # 复制为 .dev.vars 供 wrangler dev 使用；线上用 `wrangler secret put ADMIN_TOKEN`
 ADMIN_TOKEN=change-me-to-a-long-random-string
+# 可选：首页托管版名单的通知收件人；线上用 `wrangler secret put WAITLIST_TO`。本地没有 send_email 绑定，不会真的发信
+# WAITLIST_TO=you@example.com

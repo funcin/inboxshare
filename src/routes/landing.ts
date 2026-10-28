@@ -1,5 +1,8 @@
 import { Hono } from 'hono';
+import { addWaitlist } from '../db';
 import { renderPage, resolveLocale, type Locale } from '../i18n';
+import { isValidMailbox, normalizeMailbox } from '../util';
+import { notifyWaitlist } from '../waitlist';
 import { LANDING_DICTS, type LandingDict } from '../landing-i18n';
 import landingPage from '../pages/landing.html';
 import type { Env } from '../types';
@@ -78,6 +81,24 @@ export function registerLandingRoutes(app: App): void {
     c.header('Cache-Control', cache);
     return c.html(render(c.env, c.req.url, 'zh-CN', '/zh'));
   });
+  // 首页“想要托管版？”：只收邮箱。website 是蜜罐字段，机器人填了就假装成功
+  app.post('/api/waitlist', async (c) => {
+    let body: { email?: string; locale?: string; website?: string };
+    try {
+      body = await c.req.json();
+    } catch {
+      return c.json({ error: 'invalid_json' }, 400);
+    }
+    if (body.website) return c.json({ ok: true });
+    const email = normalizeMailbox(body.email ?? '');
+    if (!isValidMailbox(email)) return c.json({ error: 'invalid_email' }, 400);
+    const locale = resolveLocale(body.locale);
+    const now = Date.now();
+    const isNew = await addWaitlist(c.env.DB, email, locale, now);
+    if (isNew) c.executionCtx.waitUntil(notifyWaitlist(c.env, email, locale, now));
+    return c.json({ ok: true });
+  });
+
   app.get('/robots.txt', (c) => {
     c.header('Cache-Control', cache);
     return c.text(
