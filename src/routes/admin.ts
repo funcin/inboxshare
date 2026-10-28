@@ -85,7 +85,7 @@ export function registerAdminRoutes(app: App): void {
 
     const label = (body.label ?? '').trim().slice(0, 100) || null;
     const link: ShareLinkRow = {
-      key: buildShareKey(mailbox, label, await countLinks(c.env.DB, mailbox)),
+      key: buildShareKey(mailbox, await countLinks(c.env.DB, mailbox)),
       mailbox,
       label,
       window_minutes: windowMinutes,

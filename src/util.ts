@@ -35,15 +35,12 @@ export function sequenceLabel(index: number): string {
 }
 
 /**
- * 分享链接 key = 邮箱用户名 + 备注（没有可用备注则用序号）+ 10 位随机尾巴，例如 hidisneyK7qM2xP9aB。
- * 前缀只是为了好认，随机尾巴才是访问控制，不能去掉。
+ * 分享链接 key = 邮箱用户名 + 序号（该邮箱第几条链接：A、B、C…）+ 10 位随机尾巴，例如 hiAK7qM2xP9aB。
+ * 备注只给管理员看，不进 key。前缀只是为了好认，随机尾巴才是访问控制，不能去掉。
  */
-export function buildShareKey(mailbox: string, label: string | null, existingCount: number): string {
+export function buildShareKey(mailbox: string, existingCount: number): string {
   const local = slugPart(mailbox.split('@')[0] ?? '', 20) || 'inbox';
-  let middle = slugPart(label ?? '', 16);
-  // 备注和邮箱用户名一样（如 netflix-code 配备注 netflixcode）就不重复拼一遍，改用序号
-  if (!middle || middle === local) middle = sequenceLabel(existingCount);
-  return `${local}${middle}${randomAlnum(10)}`;
+  return `${local}${sequenceLabel(existingCount)}${randomAlnum(10)}`;
 }
 
 export function newMessageId(): string {

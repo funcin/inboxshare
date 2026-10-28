@@ -205,7 +205,7 @@ Create a share link in the admin dashboard and open `/s/<key>` to inspect the re
 
 **Anyone with a valid share URL can access the messages permitted by that link. Treat it as a secret.**
 
-- Share keys are `<mailbox user><label or letter><10 random characters>`, for example `hidisneyK7qM2xP9aB`: the prefix is for recognition, the random tail is the access control. Links can expire or be revoked.
+- Share keys are `<mailbox user><sequence letter><10 random characters>`, for example `hiAK7qM2xP9aB`: the prefix is for recognition, the random tail is the access control. Labels are admin-only and never part of the URL. Links can expire, be revoked or be deleted.
 - Rolling windows and `RETENTION_DAYS` constrain message visibility.
 - Password resets, billing, and account-security changes are excluded by default. Administrators can explicitly allow them, so only share links with people you trust.
 - Mail HTML is sanitized in the browser and rendered in a sandboxed iframe with restrictive CSP; remote images are blocked.
