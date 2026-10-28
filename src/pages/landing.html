@@ -125,7 +125,7 @@
   .split .side { flex: 2 1 560px; min-width: 0; }
 
   .flow { list-style: none; margin: 0 0 56px; padding: 0; display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
-  .flow li { flex: 1 1 180px; background: var(--is-surface); border: 1px solid var(--is-line); border-radius: 10px; padding: 16px 18px; font-size: 14px; }
+  .flow li { flex: 1 1 180px; background: var(--is-ground); border: 1px solid var(--is-line); border-radius: 10px; padding: 16px 18px; font-size: 14px; }
   .flow li .tag { font-size: 12px; color: var(--is-muted); }
   .flow li div + div { font-weight: 600; }
   .flow li.end { background: var(--is-dark-bg); color: #fff; border-color: var(--is-dark-line); }
@@ -151,6 +151,10 @@
   .uses .u { flex: 1 1 300px; border: 1px solid var(--is-line); border-radius: 14px; padding: 28px; }
   .uses h3 { margin: 0 0 10px; font-size: 18px; }
   .uses p { font-size: 15px; }
+  section.ground .uses .u { background: var(--is-surface); }
+  .prob-note { margin-top: 20px; font-size: 14px; }
+  section.ground .flow li { background: var(--is-surface); }
+  section.ground .flow li.end { background: var(--is-dark-bg); }
 
   section.ink { background: var(--is-dark-bg); color: #fff; }
   section.ink .eyebrow { color: var(--is-accent-on-dark); }
@@ -214,6 +218,7 @@
   <div class="wrap nav">
     <a class="brand" href="/" aria-label="{{brand}}"><svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><path d="M22 8H6.5A3.5 3.5 0 0 0 3 11.5v11A3.5 3.5 0 0 0 6.5 26h19a3.5 3.5 0 0 0 3.5-3.5V14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path><path class="logo-check" d="M7.5 12.5l6 5.2L28 4.5" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="wm"><span>{{brandA}}</span><b>{{brandB}}</b></span></a>
     <nav aria-label="Main">
+      <a href="#problems">{{navProblems}}</a>
       <a href="#how">{{navHow}}</a>
       <a href="#why">{{navWhy}}</a>
       <a href="#features">{{navFeatures}}</a>
@@ -270,14 +275,27 @@
     </div>
   </section>
 
-  <section id="how" class="band ground">
+  <section id="problems" class="band ground">
+    <div class="wrap">
+      <div class="eyebrow">{{probEyebrow}}</div>
+      <h2 class="t">{{probTitle}}</h2>
+      <div class="uses">
+        <div class="u"><h3>{{p1Title}}</h3><p>{{p1Body}}</p></div>
+        <div class="u"><h3>{{p2Title}}</h3><p>{{p2Body}}</p></div>
+        <div class="u"><h3>{{p3Title}}</h3><p>{{p3Body}}</p></div>
+      </div>
+      <p class="prob-note">{{probNote}}</p>
+    </div>
+  </section>
+
+  <section id="how" class="band">
     <div class="wrap">
       <div class="eyebrow">{{howTitle}}</div>
       <h2 class="t">{{howHeading}}</h2>
       <ol class="flow" aria-label="{{flowLabel}}">
         <li><div class="tag mono">{{flowTag1}}</div><div>{{flow1}}</div></li>
-        <li><div class="tag mono">{{flowTag2}}</div><div class="mono">{{flow2}}</div></li>
-        <li><div class="tag mono">{{flowTag3}}</div><div>{{flow3}}</div></li>
+        <li><div class="tag mono">{{flowTag2}}</div><div>{{flow2}}</div></li>
+        <li><div class="tag mono">{{flowTag3}}</div><div class="mono">{{flow3}}</div></li>
         <li><div class="tag mono">{{flowTag4}}</div><div>{{flow4}}</div></li>
         <li class="end"><div class="tag mono">{{flowTag5}}</div><div>{{flow5}}</div></li>
       </ol>
@@ -289,7 +307,7 @@
     </div>
   </section>
 
-  <section id="why" class="band">
+  <section id="why" class="band ground">
     <div class="wrap split">
       <div class="intro">
         <div class="eyebrow">{{whyEyebrow}}</div>
@@ -304,7 +322,7 @@
     </div>
   </section>
 
-  <section id="features" class="band ground">
+  <section id="features" class="band">
     <div class="wrap">
       <div class="eyebrow">{{featuresEyebrow}}</div>
       <h2 class="t">{{featuresTitle}}</h2>
@@ -319,7 +337,7 @@
     </div>
   </section>
 
-  <section id="uses" class="band">
+  <section id="uses" class="band ground">
     <div class="wrap">
       <div class="eyebrow">{{usesEyebrow}}</div>
       <h2 class="t">{{usesTitle}}</h2>
