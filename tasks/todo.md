@@ -32,6 +32,15 @@
 
 2026-10-28 仓库 funcin/inboxshare 设为公开（公开前扫描：历史无令牌/分享 key/账号 id，todo 中个人邮箱已替换）；GitHub 描述、主页 inboxshare.app、12 个 Topics 已设。本地目录改名为 /Volumes/Outmac/Dev/inboxshare。
 
+2026-10-28 按 `dev/design/design/handoff/HANDOFF.md`（Claude 设计画布「InboxShare Redesign」导出）整体改版三个页面 + 接入品牌资源：
+  - `public/`（Workers Static Assets，`wrangler.jsonc` 顶层和 env.production 都加了 `assets`）：favicon.svg/.ico、apple-touch-icon、icon-192/512、og-image(-zh).png、site.webmanifest。三页 `<head>` 加 icon/apple-touch-icon/theme-color；首页按语言给 og:image + twitter:card。
+  - 首页：墨黑/钴蓝体系，Hero 两栏 + 演示卡、五步管道、Why 左右分栏、Features 1px 网格、Security 墨黑带、FAQ 左右分栏（`+`/`−` 纯 CSS）、CTA 面板、页脚语言切换。文案新增 trust*/flowTag*/sTag*/cta* 等 key。
+  - 分享页：新页头（地址框 + 窗口徽标 + 44px 刷新 + 分段语言切换）、列表项选中态左 3px 内阴影、验证码区 40px、正文 iframe 容器、页脚 Powered by。手机：页头两行、新增「最新验证码」卡片（取列表第一封带 code 的邮件）、验证码标签放右侧、语言切换移到页脚。列表项 role=button + Enter/Space，验证码 aria-label 按位朗读，复制反馈进 aria-live。脚本逻辑（消毒、sandbox iframe 重建、history 返回）未动。
+  - 管理页：左表单右表格两栏，登录卡片独立，页头 Signed in / Sign out，创建成功绿色结果框 + Copy，状态胶囊，撤销/过期行置灰不显示操作，表格 overflow-x 滚动。
+  - 验证：typecheck、test:classify 通过；Playwright 驱动本机 Chrome 在 1440 / 390 两个视口真实渲染中英文全部页面（无横向溢出），交互测试 14 项通过（建链/复制/错误态/退出、手机详情与返回手势、键盘打开、FAQ 展开），深色模式三页截图检查。
+  - 踩坑：表头里 `position:absolute` 的隐藏文本会撑大 scrollWidth 造成手机横向滚动，要放在 `position:relative` 的容器内。
+  - 未做：README 换 `design/brand/logo.svg`（HANDOFF §7 说明仅供外部使用，README 由站长决定）。
+
 未做（可选）：`/api/s/*` 的 Rate Limiting 规则；`FORWARD_TO` 目前为空，共享地址的邮件只进共享收件箱不转发。
 
 ## 审查

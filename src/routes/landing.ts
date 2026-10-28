@@ -19,7 +19,7 @@ function baseUrl(env: Env, requestUrl: string): string {
 
 /** 结构化数据：软件条目（免费、开源、跑在 Cloudflare）+ FAQ，给搜索引擎富结果用 */
 function jsonLd(dict: LandingDict, locale: Locale, url: string): string {
-  const faq = ([1, 5, 7, 6, 2, 3, 4] as const).map((n) => ({
+  const faq = ([1, 2, 3, 4, 5, 6, 7] as const).map((n) => ({
     '@type': 'Question',
     name: dict[`q${n}`],
     acceptedAnswer: { '@type': 'Answer', text: dict[`a${n}`] },
@@ -58,6 +58,8 @@ function render(env: Env, requestUrl: string, locale: Locale, path: string): str
     canonical,
     githubUrl: GITHUB_URL,
     deployUrl: DEPLOY_URL,
+    guideUrl: `${GITHUB_URL}#deployment`,
+    ogImage: `${base}/${locale === 'en' ? 'og-image.png' : 'og-image-zh.png'}`,
     switchLang: locale === 'en' ? 'zh-CN' : 'en',
   }).replace('@@JSONLD@@', jsonLd(dict, locale, canonical));
 }

@@ -6,3 +6,7 @@ node_modules/
 worker-configuration.d.ts
 dev/
 .DS_Store
+
+# 本地解压的设计稿副本，真身在 dev/design（已被 dev/ 忽略）
+design/
+Claude outputs/

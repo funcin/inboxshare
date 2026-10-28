@@ -39,11 +39,20 @@ const zhCN = {
   windowAll: '全部邮件',
   windowMin: '最近 {n} 分钟',
   windowHour: '最近 {n} 小时',
+  windowHour1: '最近 1 小时',
   windowDay: '最近 {n} 天',
+  windowDay1: '最近 1 天',
   justNow: '刚刚',
   minAgo: '{n} 分钟前',
   yesterday: '昨天',
   hiddenSensitive: '{n} 封敏感邮件未显示（密码重置、账单、账户安全类默认不共享）',
+  latestCode: '最新验证码',
+  poweredByPre: '由',
+  poweredByPost: '提供支持',
+  mobileFooter: '只读分享。邮件 {days} 天后自动清理。',
+  hiddenShort: '{n} 封敏感邮件未显示。',
+  langEn: 'EN',
+  langZh: '中文',
 };
 
 const en: typeof zhCN = {
@@ -76,11 +85,20 @@ const en: typeof zhCN = {
   windowAll: 'All messages',
   windowMin: 'Last {n} min',
   windowHour: 'Last {n} hours',
+  windowHour1: 'Last hour',
   windowDay: 'Last {n} days',
+  windowDay1: 'Last day',
   justNow: 'just now',
   minAgo: '{n} min ago',
   yesterday: 'Yesterday',
   hiddenSensitive: '{n} sensitive messages hidden (password resets, billing and account security are not shared by default)',
+  latestCode: 'Latest code',
+  poweredByPre: 'Powered by',
+  poweredByPost: '',
+  mobileFooter: 'Read-only share. Messages are deleted after {days} days.',
+  hiddenShort: '{n} sensitive messages hidden.',
+  langEn: 'EN',
+  langZh: '中文',
 };
 
 export type Dict = typeof zhCN;
@@ -137,6 +155,19 @@ const adminZhCN = {
   showSensitive: '也显示敏感邮件',
   showSensitiveHint: '密码重置、账单、账户安全类邮件默认不出现在分享页。只在你确定链接只给自己人时打开。',
   tagSensitive: '含敏感邮件',
+  adminWord: '管理',
+  signedIn: '已登录',
+  signOut: '退出',
+  pageTitle: '分享链接',
+  pageSub: '为收件地址创建只读链接，撤销立即生效。',
+  createdTitle: '链接已创建',
+  linksSummary: '共 {n} 个链接 · {active} 个有效',
+  never: '永不过期',
+  optional: '（可选）',
+  expiresShort: '链接过期时间',
+  labelShort: '备注',
+  langEn: 'EN',
+  langZh: '中文',
 };
 
 const adminEn: typeof adminZhCN = {
@@ -189,6 +220,19 @@ const adminEn: typeof adminZhCN = {
   showSensitive: 'Also show sensitive messages',
   showSensitiveHint: 'Password resets, billing and account-security emails are hidden from share pages by default. Enable only for links you give to people you fully trust.',
   tagSensitive: 'includes sensitive',
+  adminWord: 'Admin',
+  signedIn: 'Signed in',
+  signOut: 'Sign out',
+  pageTitle: 'Share links',
+  pageSub: 'Create read-only links for a receiving address. Revoking takes effect immediately.',
+  createdTitle: 'Link created',
+  linksSummary: '{n} links · {active} active',
+  never: 'Never',
+  optional: '(optional)',
+  expiresShort: 'Link expiry',
+  labelShort: 'Label',
+  langEn: 'EN',
+  langZh: '中文',
 };
 
 export type AdminDict = typeof adminZhCN;

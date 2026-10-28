@@ -15,6 +15,9 @@
   // 把 .html 当字符串 import（页面模板）
   "rules": [{ "type": "Text", "globs": ["**/*.html"], "fallthrough": false }],
 
+  // favicon / og-image 等静态文件（public/ 里没有 index.html，不会抢 / 与 /s/* 等路由）
+  "assets": { "directory": "./public" },
+
   "d1_databases": [
     { "binding": "DB", "database_name": "shared-inbox", "migrations_dir": "migrations" }
   ],
@@ -55,6 +58,7 @@
       ],
       "r2_buckets": [{ "binding": "ATTACHMENTS", "bucket_name": "shared-inbox-attachments" }],
       "triggers": { "crons": ["17 3 * * *"] },
+      "assets": { "directory": "./public" },
       "vars": {
         "RETENTION_DAYS": "30",
         "PUBLIC_BASE_URL": "https://inboxshare.app",

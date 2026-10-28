@@ -2,95 +2,184 @@
 <html lang="@@LOCALE@@">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#FFFFFF">
 <title>{{adminTitle}}</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
-  :root { color-scheme: light dark; --bg:#f5f6f8; --card:#fff; --fg:#111827; --muted:#6b7280; --line:#e5e7eb; --accent:#059669; --danger:#b91c1c; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#0f1419; --card:#171d26; --fg:#e5e7eb; --muted:#9ca3af; --line:#2a3340; --accent:#34d399; --danger:#f87171; } }
+  :root { color-scheme: light dark;
+    --is-ink: #0B0F17; --is-ink-2: #3A4250; --is-muted: #586170; --is-surface: #FFFFFF; --is-ground: #F6F7F9; --is-line: #E5E8ED; --is-line-strong: #D5DAE1; --is-chip: #EEF0F3;
+    --is-accent: #2447D9; --is-accent-hover: #1A36AE; --is-link: #2447D9; --is-accent-tint: #E6ECFF; --is-logo-check: #2447D9;
+    --is-ok: #0F7A55; --is-ok-bg: #E7F5EE; --is-ok-ink: #0F6A4A; --is-ok-line: #CDE9DC; --is-ok-soft: #F1FAF5;
+    --is-warn-bg: #FFF8EC; --is-warn-line: #F1D9B5; --is-warn-ink: #5A3B0A; --is-warn-strong: #3D2806; --is-warn-tag-bg: #FFF1DB; --is-warn-tag-ink: #8A4B00;
+    --is-danger: #B3261E; --is-danger-line: #F3C9C4; --is-off-ink: #4A5260; }
+  @media (prefers-color-scheme: dark) { :root {
+    --is-ink: #E6E9EE; --is-ink-2: #C6CCD6; --is-muted: #98A1B0; --is-surface: #11161E; --is-ground: #0A0D12; --is-line: #1F2732; --is-line-strong: #2C3644; --is-chip: #1A212B;
+    --is-accent: #3F62F0; --is-accent-hover: #3354D6; --is-link: #8FA6FF; --is-accent-tint: #1C2850; --is-logo-check: #7D97FF;
+    --is-ok: #3DD68C; --is-ok-bg: #0F2A20; --is-ok-ink: #7EE2B8; --is-ok-line: #1D4434; --is-ok-soft: #0D1F19;
+    --is-warn-bg: #2A2110; --is-warn-line: #4A3A1C; --is-warn-ink: #F3D9A8; --is-warn-strong: #FFE7B8; --is-warn-tag-bg: #3A2A10; --is-warn-tag-ink: #FFC979;
+    --is-danger: #FF8A80; --is-danger-line: #5A2622; --is-off-ink: #C6CCD6; } }
   * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Noto Sans SC",sans-serif; -webkit-text-size-adjust:100%; }
-  .wrap { max-width: 960px; margin: 0 auto; padding: 16px; padding-left:max(16px, env(safe-area-inset-left)); padding-right:max(16px, env(safe-area-inset-right)); }
-  h1 { font-size: 20px; margin: 0 0 14px; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; margin-bottom:14px; }
-  label { display:block; font-size:13px; color:var(--muted); margin-bottom:4px; }
-  /* 16px 起步：iOS 聚焦小于 16px 的输入框会自动放大页面 */
-  input, select { font:inherit; font-size:16px; width:100%; min-height:40px; padding:7px 10px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--fg); }
-  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:10px; align-items:end; }
-  button { font:inherit; cursor:pointer; border:1px solid var(--line); background:var(--card); color:var(--fg); border-radius:8px; padding:7px 14px; min-height:38px; -webkit-tap-highlight-color:transparent; }
-  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
-  button.danger { color:var(--danger); }
-  table { width:100%; border-collapse:collapse; font-size:14px; }
-  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); vertical-align:top; overflow-wrap:anywhere; }
-  th { color:var(--muted); font-weight:500; font-size:13px; }
-  code { font-family: ui-monospace, Menlo, monospace; font-size:13px; }
-  .muted { color:var(--muted); font-size:13px; }
-  .err { color:var(--danger); font-size:13px; margin-top:8px; }
-  .hidden { display:none !important; }
-  .tag { font-size:12px; padding:1px 7px; border-radius:999px; border:1px solid var(--line); }
-  .tag.active { color:var(--accent); border-color:var(--accent); }
-  .tag.warn { color:var(--danger); border-color:var(--danger); margin-left:6px; }
-  td.actions { white-space:nowrap; }
-  label.check { display:flex; align-items:center; gap:8px; margin-top:12px; font-size:14px; color:var(--fg); cursor:pointer; }
-  label.check input { width:18px; height:18px; min-height:0; margin:0; }
-  @media (max-width: 700px) {
-    /* 窄屏：表格改成一行一张卡片，每个单元格前面带列名 */
-    .grid { grid-template-columns: 1fr; }
-    table, tbody, tr, td { display:block; width:100%; }
-    thead { display:none; }
-    tr { border:1px solid var(--line); border-radius:10px; padding:6px 10px; margin-bottom:10px; }
-    td { display:flex; gap:10px; border:0; padding:5px 0; }
-    td::before { content:attr(data-label); flex:0 0 6em; color:var(--muted); font-size:13px; }
-    td.actions::before { content:none; }
-    td.actions { gap:8px; padding-top:8px; white-space:normal; }
-    td.actions button { flex:1; }
+  body { margin: 0; background: var(--is-ground); color: var(--is-ink); -webkit-text-size-adjust: 100%;
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "PingFang SC", "Noto Sans SC", sans-serif; -webkit-font-smoothing: antialiased; }
+  .mono { font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace; }
+  a { color: var(--is-link); }
+  svg { display: block; }
+  :focus-visible { outline: 2px solid var(--is-accent); outline-offset: 2px; }
+  .hidden { display: none !important; }
+  .logo-check { stroke: var(--is-logo-check); }
+  h1, h2 { margin: 0; }
+  button { font: inherit; cursor: pointer; color: var(--is-ink); -webkit-tap-highlight-color: transparent; transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 0 14px; border: 1px solid var(--is-line); background: var(--is-surface); border-radius: 8px; font-size: 13px; font-weight: 550; white-space: nowrap; }
+  .btn:hover { border-color: var(--is-ink); }
+  .btn.sm { min-height: 32px; padding: 0 10px; border-radius: 6px; font-weight: 500; }
+  .btn.danger { color: var(--is-danger); border-color: var(--is-danger-line); }
+  .btn.danger:hover { border-color: var(--is-danger); }
+  .primary { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 20px; border: 0; border-radius: 10px; background: var(--is-accent); color: #fff; font-size: 15px; font-weight: 600; width: 100%; }
+  .primary:hover { background: var(--is-accent-hover); }
+  .primary:active { background: var(--is-accent-hover); transform: translateY(1px); }
+  .primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .primary:active { transform: none; } }
+
+  header { background: var(--is-surface); border-bottom: 1px solid var(--is-line); }
+  .bar { max-width: 1200px; margin: 0 auto; padding: 0 24px; padding-left: max(24px, env(safe-area-inset-left)); padding-right: max(24px, env(safe-area-inset-right)); min-height: 60px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 650; font-size: 16px; letter-spacing: -0.02em; }
+  .brand .wm span { font-weight: 450; }
+  .brand .wm b { font-weight: 750; }
+  .brand .sep { font-weight: 500; color: var(--is-muted); border-left: 1px solid var(--is-line); padding-left: 10px; margin-left: 2px; }
+  .right { margin-left: auto; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 13px; }
+  .signed { display: inline-flex; align-items: center; gap: 6px; color: var(--is-ok); font-weight: 550; }
+  .signed::before { content: ""; width: 7px; height: 7px; border-radius: 999px; background: var(--is-ok); }
+  .lang { display: flex; gap: 2px; border: 1px solid var(--is-line); border-radius: 8px; padding: 3px; }
+  .lang a { padding: 4px 10px; border-radius: 5px; color: var(--is-muted); text-decoration: none; }
+  .lang a[aria-current="page"] { background: var(--is-ink); color: var(--is-surface); }
+
+  main { max-width: 1200px; margin: 0 auto; padding: 32px 24px 48px; padding-left: max(24px, env(safe-area-inset-left)); padding-right: max(24px, env(safe-area-inset-right)); display: flex; flex-direction: column; gap: 24px; }
+  .page-head h1 { font-size: 26px; letter-spacing: -0.02em; }
+  .page-head p { margin: 4px 0 0; color: var(--is-muted); font-size: 14px; }
+  .card { background: var(--is-surface); border: 1px solid var(--is-line); border-radius: 12px; }
+  .auth { max-width: 420px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .auth h1 { font-size: 20px; letter-spacing: -0.02em; }
+  .cols { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+  .form { flex: 1 1 360px; max-width: 420px; min-width: 0; padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+  .form h2, .thead h2 { font-size: 16px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 13px; font-weight: 600; }
+  .field label .opt { font-weight: 400; color: var(--is-muted); }
+  .two { display: flex; gap: 12px; flex-wrap: wrap; }
+  .two .field { flex: 1 1 140px; }
+  input, select { font: inherit; font-size: 15px; width: 100%; min-height: 42px; padding: 0 12px; border: 1px solid var(--is-line-strong); border-radius: 8px; background: var(--is-surface); color: var(--is-ink); }
+  input:focus, select:focus { outline: none; border-color: var(--is-accent); box-shadow: 0 0 0 3px var(--is-accent-tint); }
+  input.invalid { border-color: var(--is-danger); }
+  .sens { display: flex; gap: 10px; align-items: flex-start; padding: 14px; border: 1px solid var(--is-warn-line); background: var(--is-warn-bg); border-radius: 8px; font-size: 13px; color: var(--is-warn-ink); cursor: pointer; }
+  .sens input { width: 16px; height: 16px; min-height: 0; margin: 3px 0 0; flex: 0 0 auto; }
+  .sens b { display: block; color: var(--is-warn-strong); }
+  .err { color: var(--is-danger); font-size: 13px; }
+  .created { border: 1px solid var(--is-ok-line); background: var(--is-ok-soft); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+  .created .ct { font-size: 12px; font-weight: 600; color: var(--is-ok-ink); }
+  .created .cr { display: flex; gap: 8px; align-items: center; }
+  .created .cr a { flex: 1; min-width: 0; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--is-ink); }
+  .created .btn { border-color: var(--is-ok-line); }
+
+  .tables { flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
+  .tables .card { overflow: hidden; }
+  .thead { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 16px 20px; border-bottom: 1px solid var(--is-line); }
+  .thead span { font-size: 13px; color: var(--is-muted); }
+  .scroll { overflow-x: auto; position: relative; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-weight: 600; font-size: 12px; color: var(--is-muted); letter-spacing: 0.04em; text-transform: uppercase; padding: 10px 12px; border-bottom: 1px solid var(--is-line); background: var(--is-ground); white-space: nowrap; }
+  td { padding: 12px; border-bottom: 1px solid var(--is-line); font-size: 14px; white-space: nowrap; vertical-align: middle; }
+  th:first-child, td:first-child { padding-left: 20px; }
+  th:last-child, td:last-child { padding-right: 20px; }
+  tr:last-child td { border-bottom: 0; }
+  tr.off td { color: var(--is-muted); }
+  td .lbl { font-weight: 600; }
+  td .key { font-size: 12px; color: var(--is-muted); }
+  td .key a { color: inherit; text-decoration: none; }
+  td .key a:hover { text-decoration: underline; }
+  td.mono { font-size: 13px; }
+  td.muted { color: var(--is-muted); }
+  td.actions { text-align: right; }
+  .tag { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 600; color: var(--is-warn-tag-ink); background: var(--is-warn-tag-bg); border-radius: 4px; padding: 1px 6px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 10px; color: var(--is-off-ink); background: var(--is-chip); }
+  .pill.active { color: var(--is-ok-ink); background: var(--is-ok-bg); }
+  .pill.active::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: var(--is-ok); }
+  .empty { padding: 20px; color: var(--is-muted); font-size: 14px; }
+
+  @media (max-width: 800px) {
+    .bar { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+    main { padding: 24px 16px 40px; padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+    .form { max-width: none; }
+    /* iOS 聚焦小于 16px 的输入框会自动放大页面 */
+    input, select { font-size: 16px; }
+    td.actions .btn { min-height: 44px; }
   }
 </style>
 </head>
 <body>
-<nav aria-label="Language" style="display:flex;justify-content:flex-end;gap:12px;padding:10px 18px;font-size:13px"><a id="switch-en" href="?lang=en">English</a><a id="switch-zh" href="?lang=zh-CN">中文</a></nav><script>for(const [id,lang] of [['switch-en','en'],['switch-zh','zh-CN']]) { const a=document.getElementById(id);const u=new URL(location.href);u.searchParams.set('lang',lang);a.href=u.pathname+u.search; if(document.documentElement.lang===lang) a.setAttribute('aria-current','page'); }</script>
-<div class="wrap">
-  <h1>{{adminTitle}}</h1>
+<header>
+  <div class="bar">
+    <div class="brand"><svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true"><path d="M22 8H6.5A3.5 3.5 0 0 0 3 11.5v11A3.5 3.5 0 0 0 6.5 26h19a3.5 3.5 0 0 0 3.5-3.5V14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path><path class="logo-check" d="M7.5 12.5l6 5.2L28 4.5" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="wm"><span>Inbox</span><b>Share</b></span><span class="sep">{{adminWord}}</span></div>
+    <div class="right">
+      <span class="signed hidden" id="signed">{{signedIn}}</span>
+      <nav class="lang" aria-label="Language"><a id="switch-en" href="?lang=en">{{langEn}}</a><a id="switch-zh" href="?lang=zh-CN">{{langZh}}</a></nav>
+      <button type="button" class="btn hidden" id="logout">{{signOut}}</button>
+    </div>
+  </div>
+</header>
 
-  <div class="card" id="auth">
-    <label for="token">{{tokenLabel}}</label>
-    <div class="grid"><input id="token" type="password" autocomplete="off"><button class="primary" id="login">{{enter}}</button></div>
+<main>
+  <div class="card auth" id="auth">
+    <h1>{{adminTitle}}</h1>
+    <div class="field"><label for="token">{{tokenLabel}}</label><input id="token" type="password" autocomplete="off"></div>
+    <button class="primary" id="login">{{enter}}</button>
     <div class="err hidden" id="auth-err">{{authErr}}</div>
   </div>
 
   <div id="app" class="hidden">
-    <div class="card">
-      <h2 style="font-size:16px;margin:0 0 10px">{{newLink}}</h2>
-      <div class="grid">
-        <div><label for="mailbox">{{mailbox}}</label><input id="mailbox" list="mailboxes" placeholder="{{mailboxPlaceholder}}"><datalist id="mailboxes"></datalist></div>
-        <div><label for="window">{{window}}</label>
-          <select id="window">
-            <option value="30">{{win30}}</option><option value="60">{{win60}}</option><option value="360">{{win360}}</option>
-            <option value="1440">{{win1440}}</option><option value="10080">{{win10080}}</option><option value="0">{{win0}}</option>
-          </select></div>
-        <div><label for="expires">{{expires}}</label><input id="expires" type="datetime-local"></div>
-        <div><label for="label">{{label}}</label><input id="label" placeholder="{{labelPlaceholder}}"></div>
-        <div><button class="primary" id="create">{{create}}</button></div>
+    <div class="page-head"><h1>{{pageTitle}}</h1><p>{{pageSub}}</p></div>
+    <div class="cols" style="margin-top: 24px">
+      <section class="card form" aria-labelledby="new-link-h">
+        <h2 id="new-link-h">{{newLink}}</h2>
+        <div class="field"><label for="mailbox">{{mailbox}}</label><input id="mailbox" class="mono" list="mailboxes" placeholder="{{mailboxPlaceholder}}" autocomplete="off"><datalist id="mailboxes"></datalist></div>
+        <div class="two">
+          <div class="field"><label for="window">{{window}}</label>
+            <select id="window">
+              <option value="30">{{win30}}</option><option value="60">{{win60}}</option><option value="360">{{win360}}</option>
+              <option value="1440">{{win1440}}</option><option value="10080">{{win10080}}</option><option value="0">{{win0}}</option>
+            </select></div>
+          <div class="field"><label for="expires">{{expiresShort}} <span class="opt">{{optional}}</span></label><input id="expires" type="datetime-local"></div>
+        </div>
+        <div class="field"><label for="label">{{labelShort}} <span class="opt">{{optional}}</span></label><input id="label" placeholder="{{labelPlaceholder}}"></div>
+        <label class="sens" for="sensitive"><input type="checkbox" id="sensitive"><span><b>{{showSensitive}}</b>{{showSensitiveHint}}</span></label>
+        <button class="primary" id="create">{{create}}</button>
+        <div class="err hidden" id="create-err"></div>
+        <div class="created hidden" id="created">
+          <span class="ct">{{createdTitle}}</span>
+          <div class="cr"><a class="mono" id="created-url" href="#" target="_blank" rel="noopener"></a><button type="button" class="btn sm" id="created-copy">{{copy}}</button></div>
+        </div>
+      </section>
+
+      <div class="tables">
+        <section class="card" aria-labelledby="links-h">
+          <div class="thead"><h2 id="links-h">{{links}}</h2><span id="links-summary"></span></div>
+          <div class="scroll"><table><thead><tr><th>{{thLink}}</th><th>{{thMailbox}}</th><th>{{thWindow}}</th><th>{{thStatus}}</th><th>{{thExpires}}</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody id="link-rows"></tbody></table></div>
+          <div class="empty hidden" id="link-empty">{{linkEmpty}}</div>
+        </section>
+
+        <section class="card" aria-labelledby="mb-h">
+          <div class="thead"><h2 id="mb-h">{{mailboxes}}</h2></div>
+          <div class="scroll"><table><thead><tr><th>{{thMailbox}}</th><th>{{thCount}}</th><th>{{thLatest}}</th></tr></thead><tbody id="mb-rows"></tbody></table></div>
+          <div class="empty" id="mb-empty">{{mbEmpty}}</div>
+        </section>
       </div>
-      <label class="check" for="sensitive"><input type="checkbox" id="sensitive"> <span>{{showSensitive}}</span></label>
-      <div class="muted" style="margin-top:2px">{{showSensitiveHint}}</div>
-      <div class="err hidden" id="create-err"></div>
-      <div class="muted" id="created" style="margin-top:10px"></div>
-    </div>
-
-    <div class="card">
-      <h2 style="font-size:16px;margin:0 0 10px">{{mailboxes}}</h2>
-      <table><thead><tr><th>{{thMailbox}}</th><th>{{thCount}}</th><th>{{thLatest}}</th></tr></thead><tbody id="mb-rows"></tbody></table>
-      <div class="muted" id="mb-empty">{{mbEmpty}}</div>
-    </div>
-
-    <div class="card">
-      <h2 style="font-size:16px;margin:0 0 10px">{{links}}</h2>
-      <table><thead><tr><th>{{thLink}}</th><th>{{thMailbox}}</th><th>{{thWindow}}</th><th>{{thStatus}}</th><th>{{thExpires}}</th><th></th></tr></thead><tbody id="link-rows"></tbody></table>
-      <div class="muted hidden" id="link-empty">{{linkEmpty}}</div>
     </div>
   </div>
-</div>
+</main>
 
 <script>window.__I18N__ = @@I18N_JSON@@; window.__LOCALE__ = "@@LOCALE@@";</script>
 <script>
@@ -98,7 +187,8 @@
   var T = window.__I18N__;
   var LOCALE = window.__LOCALE__ === 'en' ? 'en-US' : 'zh-CN';
   var $ = function (id) { return document.getElementById(id); };
-  var token = sessionStorage.getItem('shared-inbox-admin-token') || '';
+  var STORE = 'shared-inbox-admin-token';
+  var token = sessionStorage.getItem(STORE) || '';
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function tpl(s, vars) { return s.replace(/\{(\w+)\}/g, function (_, k) { return vars[k] != null ? vars[k] : ''; }); }
   function fmt(ms) { return ms ? new Date(ms).toLocaleString(LOCALE, { hour12: false, year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'; }
@@ -113,59 +203,98 @@
     return fetch(path, opts).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, body: j }; }); });
   }
 
+  // 语言切换：保留当前路径，只改 lang 参数
+  [['switch-en', 'en'], ['switch-zh', 'zh-CN']].forEach(function (p) {
+    var a = $(p[0]);
+    var u = new URL(location.href); u.searchParams.set('lang', p[1]); a.href = u.pathname + u.search;
+    if (document.documentElement.lang === p[1]) a.setAttribute('aria-current', 'page');
+  });
+
+  function setSignedIn(on) {
+    $('auth').classList.toggle('hidden', on);
+    $('app').classList.toggle('hidden', !on);
+    $('signed').classList.toggle('hidden', !on);
+    $('logout').classList.toggle('hidden', !on);
+  }
+
   function enter() {
     token = $('token').value.trim();
+    $('auth-err').classList.add('hidden');
     req('/api/admin/session').then(function (r) {
-      if (!r.ok) { $('auth-err').classList.remove('hidden'); return; }
-      sessionStorage.setItem('shared-inbox-admin-token', token);
-      $('auth').classList.add('hidden'); $('app').classList.remove('hidden');
+      if (!r.ok) { $('auth-err').classList.remove('hidden'); $('token').classList.add('invalid'); return; }
+      $('token').classList.remove('invalid');
+      sessionStorage.setItem(STORE, token);
+      setSignedIn(true);
       refresh();
     });
+  }
+
+  function signOut() {
+    sessionStorage.removeItem(STORE);
+    token = '';
+    $('token').value = '';
+    setSignedIn(false);
   }
 
   function refresh() {
     req('/api/admin/mailboxes').then(function (r) {
       var rows = r.body.items || [];
       $('mb-rows').innerHTML = rows.map(function (m) {
-        return '<tr><td data-label="' + esc(T.thMailbox) + '"><code>' + esc(m.mailbox) + '</code></td><td data-label="' + esc(T.thCount) + '">' + m.count + '</td><td data-label="' + esc(T.thLatest) + '">' + esc(fmt(m.latest)) + '</td></tr>';
+        return '<tr><td class="mono">' + esc(m.mailbox) + '</td><td>' + m.count + '</td><td class="muted">' + esc(fmt(m.latest)) + '</td></tr>';
       }).join('');
       $('mb-empty').classList.toggle('hidden', rows.length > 0);
       $('mailboxes').innerHTML = rows.map(function (m) { return '<option value="' + esc(m.mailbox) + '">'; }).join('');
     });
     req('/api/admin/links').then(function (r) {
       var rows = r.body.items || [];
+      var active = rows.filter(function (l) { return l.status === 'active'; }).length;
+      $('links-summary').textContent = rows.length ? tpl(T.linksSummary, { n: rows.length, active: active }) : '';
       $('link-empty').classList.toggle('hidden', rows.length > 0);
       $('link-rows').innerHTML = rows.map(function (l) {
-        return '<tr><td data-label="' + esc(T.thLink) + '"><div><a href="' + esc(l.url) + '" target="_blank" rel="noopener"><code>/s/' + esc(l.key.slice(0, 8)) + '…</code></a>'
-          + (l.label ? '<div class="muted">' + esc(l.label) + '</div>' : '') + '</div></td>'
-          + '<td data-label="' + esc(T.thMailbox) + '"><code>' + esc(l.mailbox) + '</code></td><td data-label="' + esc(T.thWindow) + '">' + esc(win(l.window_minutes)) + (l.show_sensitive ? ' <span class="tag warn">' + esc(T.tagSensitive) + '</span>' : '') + '</td>'
-          + '<td data-label="' + esc(T.thStatus) + '"><span class="tag ' + esc(l.status) + '">' + esc(statusLabel(l.status)) + '</span></td><td data-label="' + esc(T.thExpires) + '">' + esc(fmt(l.expires_at)) + '</td>'
-          + '<td class="actions">' + (l.status === 'active' ? '<button class="danger" data-revoke="' + esc(l.key) + '">' + esc(T.revoke) + '</button> <button data-copy="' + esc(l.url) + '">' + esc(T.copy) + '</button>' : '') + '</td></tr>';
+        var on = l.status === 'active';
+        return '<tr' + (on ? '' : ' class="off"') + '><td>' + (l.label ? '<div class="lbl">' + esc(l.label) + '</div>' : '')
+          + '<div class="key mono"><a href="' + esc(l.url) + '" target="_blank" rel="noopener">/s/' + esc(l.key.slice(0, 8)) + '…</a></div>'
+          + (l.show_sensitive ? '<span class="tag">' + esc(T.tagSensitive) + '</span>' : '') + '</td>'
+          + '<td class="mono">' + esc(l.mailbox) + '</td><td>' + esc(win(l.window_minutes)) + '</td>'
+          + '<td><span class="pill ' + esc(l.status) + '">' + esc(statusLabel(l.status)) + '</span></td>'
+          + '<td class="muted">' + (l.expires_at ? esc(fmt(l.expires_at)) : (on ? esc(T.never) : '—')) + '</td>'
+          + '<td class="actions">' + (on ? '<button type="button" class="btn sm" data-copy="' + esc(l.url) + '">' + esc(T.copy) + '</button> <button type="button" class="btn sm danger" data-revoke="' + esc(l.key) + '">' + esc(T.revoke) + '</button>' : '') + '</td></tr>';
       }).join('');
     });
   }
 
   $('login').addEventListener('click', enter);
   $('token').addEventListener('keydown', function (e) { if (e.key === 'Enter') enter(); });
+  $('logout').addEventListener('click', signOut);
 
   $('create').addEventListener('click', function () {
     $('create-err').classList.add('hidden');
+    $('created').classList.add('hidden');
+    $('mailbox').classList.remove('invalid');
     var expires = $('expires').value ? new Date($('expires').value).toISOString() : null;
+    var btn = $('create'); btn.disabled = true;
     req('/api/admin/links', { method: 'POST', body: JSON.stringify({ mailbox: $('mailbox').value, windowMinutes: Number($('window').value), expiresAt: expires, label: $('label').value, showSensitive: $('sensitive').checked }) })
       .then(function (r) {
-        if (!r.ok) { $('create-err').textContent = tpl(T.createFailed, { reason: errorLabel(r.body.error || r.status) }); $('create-err').classList.remove('hidden'); return; }
-        $('created').innerHTML = esc(T.created) + '<a href="' + esc(r.body.link.url) + '" target="_blank" rel="noopener">' + esc(r.body.link.url) + '</a>';
+        btn.disabled = false;
+        if (!r.ok) {
+          if (r.body.error === 'invalid_mailbox') $('mailbox').classList.add('invalid');
+          $('create-err').textContent = tpl(T.createFailed, { reason: errorLabel(r.body.error || r.status) }); $('create-err').classList.remove('hidden'); return;
+        }
+        var url = r.body.link.url;
+        $('created-url').href = url; $('created-url').textContent = url;
+        $('created-copy').dataset.copy = url;
+        $('created').classList.remove('hidden');
         refresh();
-      });
+      }, function () { btn.disabled = false; });
   });
 
   document.addEventListener('click', function (e) {
-    var t = e.target;
-    if (t.dataset && t.dataset.revoke) {
+    var t = e.target.closest ? e.target.closest('[data-revoke],[data-copy]') : null;
+    if (!t) return;
+    if (t.dataset.revoke) {
       if (!confirm(T.confirmRevoke)) return;
       req('/api/admin/links/' + encodeURIComponent(t.dataset.revoke), { method: 'DELETE' }).then(refresh);
-    }
-    if (t.dataset && t.dataset.copy && navigator.clipboard) {
+    } else if (t.dataset.copy && navigator.clipboard) {
       navigator.clipboard.writeText(t.dataset.copy).then(function () { t.textContent = T.copied; setTimeout(function () { t.textContent = T.copy; }, 1500); });
     }
   });
