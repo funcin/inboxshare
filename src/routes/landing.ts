@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { renderPage, resolveLocale, type Locale } from '../i18n';
-import { LANDING_DICTS } from '../landing-i18n';
+import { LANDING_DICTS, type LandingDict } from '../landing-i18n';
 import landingPage from '../pages/landing.html';
 import type { Env } from '../types';
 
@@ -17,17 +17,49 @@ function baseUrl(env: Env, requestUrl: string): string {
   return (configured || new URL(requestUrl).origin).replace(/\/+$/, '');
 }
 
+/** 结构化数据：软件条目（免费、开源、跑在 Cloudflare）+ FAQ，给搜索引擎富结果用 */
+function jsonLd(dict: LandingDict, locale: Locale, url: string): string {
+  const faq = ([1, 5, 7, 6, 2, 3, 4] as const).map((n) => ({
+    '@type': 'Question',
+    name: dict[`q${n}`],
+    acceptedAnswer: { '@type': 'Answer', text: dict[`a${n}`] },
+  }));
+  const data = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'SoftwareApplication',
+        name: dict.brand,
+        url,
+        inLanguage: locale,
+        description: dict.metaDesc,
+        applicationCategory: 'UtilitiesApplication',
+        operatingSystem: 'Cloudflare Workers',
+        isAccessibleForFree: true,
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+        license: `${GITHUB_URL}/blob/main/LICENSE`,
+        sameAs: GITHUB_URL,
+        keywords:
+          'shared OTP inbox, email verification codes, Cloudflare Email Routing web UI, Cloudflare Email Worker, serverless shared inbox, read-only inbox, self-hosted',
+      },
+      { '@type': 'FAQPage', mainEntity: faq },
+    ],
+  };
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
 function render(env: Env, requestUrl: string, locale: Locale, path: string): string {
   const base = baseUrl(env, requestUrl);
   const dict = LANDING_DICTS[locale];
+  const canonical = `${base}${path}`;
   return renderPage(landingPage, locale, {
     ...dict,
     baseUrl: base,
-    canonical: `${base}${path}`,
+    canonical,
     githubUrl: GITHUB_URL,
     deployUrl: DEPLOY_URL,
     switchLang: locale === 'en' ? 'zh-CN' : 'en',
-  });
+  }).replace('@@JSONLD@@', jsonLd(dict, locale, canonical));
 }
 
 export function registerLandingRoutes(app: App): void {

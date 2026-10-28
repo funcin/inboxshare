@@ -13,6 +13,7 @@
 <meta property="og:title" content="{{metaTitle}}">
 <meta property="og:description" content="{{metaDesc}}">
 <meta property="og:url" content="{{canonical}}">
+<script type="application/ld+json">@@JSONLD@@</script>
 <style>
   :root { color-scheme: light dark;
     --bg: #F3F5F8; --card: #FFFFFF; --fg: #16181D; --muted: #5B6572; --line: #E3E7EC;
@@ -72,12 +73,15 @@
   h3 { margin: 0 0 8px; font-size: 17px; }
   p { margin: 0; color: var(--muted); }
   .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-  .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
   .card .icon { width: 36px; height: 36px; border-radius: 9px; background: var(--accent-soft); border: 1px solid var(--accent-line); color: var(--accent-ink); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
   ul.sec { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 24px; }
   ul.sec li { display: flex; gap: 10px; color: var(--muted); }
   ul.sec svg { flex: 0 0 auto; margin-top: 4px; color: var(--ok); }
+  .flow { list-style: none; margin: 0 0 28px; padding: 14px 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 6px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; font-size: 14px; }
+  .flow li { display: flex; align-items: center; gap: 6px; }
+  .flow li + li::before { content: "→"; color: var(--muted); margin-right: 6px; }
+  .flow li:last-child { color: var(--accent-ink); font-weight: 600; }
   .faq details { border-top: 1px solid var(--line); padding: 14px 0; }
   .faq details:last-child { border-bottom: 1px solid var(--line); }
   .faq summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; }
@@ -90,7 +94,8 @@
 
   @media (max-width: 800px) {
     .hero { grid-template-columns: minmax(0, 1fr); padding-top: 40px; padding-bottom: 36px; gap: 28px; }
-    .steps, .grid, .grid2, ul.sec { grid-template-columns: minmax(0, 1fr); }
+    .steps, .grid, ul.sec { grid-template-columns: minmax(0, 1fr); }
+    .flow { font-size: 13px; }
     section { padding: 40px 0; }
     .nav nav { gap: 14px; }
     .nav nav a.hide-m { display: none; }
@@ -104,6 +109,7 @@
     <nav>
       <a class="hide-m" href="#features">{{navFeatures}}</a>
       <a class="hide-m" href="#how">{{navHow}}</a>
+      <a class="hide-m" href="#why">{{navWhy}}</a>
       <a class="hide-m" href="#security">{{navSecurity}}</a>
       <a class="hide-m" href="#faq">{{navFaq}}</a>
       <a href="{{githubUrl}}" rel="noopener">{{navGithub}}</a>
@@ -143,6 +149,13 @@
   <section id="how" class="alt">
     <div class="wrap">
       <h2>{{howTitle}}</h2>
+      <ol class="flow" aria-label="{{flowLabel}}">
+        <li>{{flow1}}</li>
+        <li class="mono">{{flow2}}</li>
+        <li>{{flow3}}</li>
+        <li>{{flow4}}</li>
+        <li>{{flow5}}</li>
+      </ol>
       <div class="steps">
         <div class="step"><h3>{{how1Title}}</h3><p>{{how1Body}}</p></div>
         <div class="step"><h3>{{how2Title}}</h3><p>{{how2Body}}</p></div>
@@ -151,7 +164,18 @@
     </div>
   </section>
 
-  <section id="features">
+  <section id="why">
+    <div class="wrap">
+      <h2>{{whyTitle}}</h2>
+      <div class="grid">
+        <div class="card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M14.5 9.5a2.5 2.5 0 0 0-2.5-1.5c-1.5 0-2.5 1-2.5 2s1 1.6 2.5 2 2.5 1 2.5 2-1 2-2.5 2a2.5 2.5 0 0 1-2.5-1.5"></path><path d="M12 6.5v1.5M12 16v1.5"></path></svg></div><h3>{{w1Title}}</h3><p>{{w1Body}}</p></div>
+        <div class="card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"></path></svg></div><h3>{{w2Title}}</h3><p>{{w2Body}}</p></div>
+        <div class="card"><div class="icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"></path><path d="M9 12l2 2 4-4"></path></svg></div><h3>{{w3Title}}</h3><p>{{w3Body}}</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="alt">
     <div class="wrap">
       <h2>{{featuresTitle}}</h2>
       <div class="grid">
@@ -165,17 +189,18 @@
     </div>
   </section>
 
-  <section id="uses" class="alt">
+  <section id="uses">
     <div class="wrap">
       <h2>{{usesTitle}}</h2>
-      <div class="grid2">
+      <div class="grid">
         <div class="card"><h3>{{u1Title}}</h3><p>{{u1Body}}</p></div>
         <div class="card"><h3>{{u2Title}}</h3><p>{{u2Body}}</p></div>
+        <div class="card"><h3>{{u3Title}}</h3><p>{{u3Body}}</p></div>
       </div>
     </div>
   </section>
 
-  <section id="security">
+  <section id="security" class="alt">
     <div class="wrap">
       <h2>{{securityTitle}}</h2>
       <ul class="sec">
@@ -187,10 +212,13 @@
     </div>
   </section>
 
-  <section id="faq" class="alt">
+  <section id="faq">
     <div class="wrap faq">
       <h2>{{faqTitle}}</h2>
       <details><summary>{{q1}}</summary><p>{{a1}}</p></details>
+      <details><summary>{{q5}}</summary><p>{{a5}}</p></details>
+      <details><summary>{{q7}}</summary><p>{{a7}}</p></details>
+      <details><summary>{{q6}}</summary><p>{{a6}}</p></details>
       <details><summary>{{q2}}</summary><p>{{a2}}</p></details>
       <details><summary>{{q3}}</summary><p>{{a3}}</p></details>
       <details><summary>{{q4}}</summary><p>{{a4}}</p></details>
