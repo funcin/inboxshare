@@ -30,6 +30,8 @@
 2026-10-28 首页 SEO 二次迭代（Serverless 卖点）：标题/描述改为"serverless shared OTP inbox + Cloudflare Email Routing"；新增"为什么 Serverless"区块（0 元无维护 / Email Worker 即时送达不轮询 IMAP / 不要邮箱密码不要 OAuth）、转发链路条、第三个场景"Cloudflare Email Routing 网页收件箱"、3 条 FAQ（要不要邮件服务器、Gmail 怎么只转验证码、能否当 Email Routing 的 web UI）；`<head>` 注入 SoftwareApplication + FAQPage 的 JSON-LD（在 `src/routes/landing.ts` 生成，`@@JSONLD@@` 占位不走 HTML 转义）。只写项目真实支持的能力：不宣称通用 HTTP webhook / SendGrid / Vercel。中英、桌面（Chrome 扩展）、手机 390px（Playwright 驱动本机 Chrome，scrollWidth=390 无横向溢出）真实渲染通过。
   站长待办：GitHub 仓库 About 改成 serverless 版描述、加 Topics（cloudflare-email-routing、cloudflare-workers、serverless、otp-inbox、shared-inbox、self-hosted 等）、README 首屏同步 Serverless 措辞；外链：awesome-selfhosted / awesome-cloudflare PR、Dev.to 教程。
 
+2026-10-28 仓库 funcin/inboxshare 设为公开（公开前扫描：历史无令牌/分享 key/账号 id，todo 中个人邮箱已替换）；GitHub 描述、主页 inboxshare.app、12 个 Topics 已设。本地目录改名为 /Volumes/Outmac/Dev/inboxshare。
+
 未做（可选）：`/api/s/*` 的 Rate Limiting 规则；`FORWARD_TO` 目前为空，共享地址的邮件只进共享收件箱不转发。
 
 ## 审查
