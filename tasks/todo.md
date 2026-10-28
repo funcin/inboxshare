@@ -44,7 +44,7 @@
 2026-10-28 分享链接 key 改成可读格式：`邮箱用户名 + 备注（slug 化，中文等非 ASCII 丢弃后为空则用序号字母 A/B/C…）+ 10 位字母数字随机尾巴`，例如 `sharedisneyfamilyv6X5Si4Yl5`、`hiAA5ZR5179HG`。站长明确不要日期、不要连字符。随机尾巴是唯一的访问控制，不能去掉（`src/util.ts` 的 `buildShareKey`）。`public.ts` 的 key 校验最短从 16 放宽到 8，旧的 32 位随机 key 继续可用。管理页链接列改为显示完整 key（CSS 省略）。首页 Security 文案、README、CLAUDE.md 里"32 位随机 key"同步改掉。本地验证：带备注 / 无备注连续两条（F、G）/ 中文备注 / 新邮箱首条（A）四种情况，新旧 key 都能打开分享页，过短或含非法字符的 key 返回 403。
 
 2026-10-28 分享页手动刷新加反馈：按钮转圈 + 蓝色描边并禁用（至少 500ms），列表头先显示"正在刷新…"，完成后绿色"已刷新"1.5 秒再恢复，aria-live 播报；自动刷新不走这套。减少动态效果时不转圈。
-2026-10-28 管理页加"删除"：`DELETE /api/admin/links/:key` 改为真删除（任意状态可删，删后 /s/<key> 立即 403，列表不再显示），撤销改走 `POST /api/admin/links/:key/revoke`。删除按钮是垃圾桶图标（aria-label + title），走 confirm()。链接表格重排：邮箱并入链接列第三行、过期时间用紧凑数字日期、状态与操作不换行，桌面 1440 下表格恰好贴合卡片不出横向滚动条（中英文均验证）；手机仍是容器内横向滚动。`buildShareKey` 里备注 slug 与邮箱用户名相同时改用序号，避免 `netflixcodenetflixcode…`。
+2026-10-28 管理页加"删除"：`DELETE /api/admin/links/:key` 改为真删除（任意状态可删，删后 /s/<key> 立即 403，列表不再显示），撤销改走 `POST /api/admin/links/:key/revoke`。删除按钮是垃圾桶图标（aria-label + title），走 confirm()。链接表格按站长要求定为七列：邮箱 / 窗口 / 状态 / 分享链接 / 过期 / 备注 / 管理（复制、撤销、删除三个图标按钮，title + aria-label，复制成功图标变对勾 1.5 秒）。`table-layout: fixed` + 像素列宽（128/84/96/112/130/84/132 = 766，正好贴合桌面卡片），单元格单行省略、完整内容在 title 里；窄屏在容器内横向滚动。过期时间用紧凑数字日期。`buildShareKey` 里备注 slug 与邮箱用户名相同时改用序号，避免 `netflixcodenetflixcode…`。
 
 未做（可选）：`/api/s/*` 的 Rate Limiting 规则；`FORWARD_TO` 目前为空，共享地址的邮件只进共享收件箱不转发。
 
