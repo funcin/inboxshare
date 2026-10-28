@@ -29,6 +29,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Apply D1 migrations and deploy
         run: pnpm run deploy
+      # 步骤级 if 里不能引用 secrets 上下文（整个工作流会解析失败、每次 push 都报 "no jobs"），所以在 shell 里判断
       - name: Set ADMIN_TOKEN secret
-        if: ${{ secrets.ADMIN_TOKEN != '' }}
-        run: printf '%s' "${{ secrets.ADMIN_TOKEN }}" | pnpm wrangler secret put ADMIN_TOKEN
+        env:
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+        run: |
+          if [ -z "$ADMIN_TOKEN" ]; then echo "ADMIN_TOKEN secret not set, skipping"; exit 0; fi
+          printf '%s' "$ADMIN_TOKEN" | pnpm wrangler secret put ADMIN_TOKEN
