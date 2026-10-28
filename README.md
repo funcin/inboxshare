@@ -1,163 +1,133 @@
 # InboxShare
 
-**Share verification emails and login codes through one read-only link.**
+**New device, new code. Your family gets it without asking you.**
 
-InboxShare is an open-source, self-hosted **shared verification inbox**. Forward selected emails from Gmail, Outlook, iCloud Mail, or another existing mailbox to an address on your own domain. Authorized family members and teammates can then open a permanent web link to read messages and copy email verification codes without asking an administrator to forward each message.
+InboxShare is an open-source, self-hosted **shared verification inbox**. Forward the verification emails from your existing mailbox (Gmail, Outlook, iCloud Mail, anything that can forward) to an address on your own domain, and the people you authorize read the latest login code themselves through one read-only link.
 
-**No shared email password. No viewer registration. No app to install.**
+No shared email password. No account or app for viewers. $0/month on Cloudflare's free tier.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/funcin/inboxshare)
 
-[中文简介](#中文简介)
+**Website:** [inboxshare.app](https://inboxshare.app) · **中文文档:** [README.zh-CN.md](./README.zh-CN.md)
 
-## The problem
+---
 
-A family member or teammate needs an email login code. It lands in an administrator's inbox, so everyone has to wait while that person finds and forwards it. InboxShare makes access self-service.
+## 1. Scenario
 
-1. Set up a filter in your existing mailbox to forward **only selected verification emails** to `share@yourdomain.com`.
-2. Cloudflare Email Routing delivers those messages to InboxShare.
-3. Create a revocable, read-only link in the admin dashboard.
-4. Share the link with authorized viewers. They can view recent emails and copy codes themselves.
+You are the person whose email address is on the shared accounts. Every one of these lands on you:
 
-Typical use cases include household subscription management where the provider's terms allow sharing, team email-based login verification, and read-only access to operational notifications.
+- **Saturday night, your parents' new TV.** Netflix asks for a 4-digit code on the TV and emails it to you. It expires in 15 minutes. You dig through your inbox, screenshot it, post it in the family chat, and hope they got it in time.
+- **"Yes, this was me", from another city.** Disney+ and HBO Max send a confirmation button instead of a code. The button is in your mailbox; the person signing in is 300 km away. You end up clicking it blind.
+- **The shared ChatGPT or Claude account.** ChatGPT and Claude sign you in with a 6-digit code sent to the registered mailbox instead of a password. The account is in your name, so every teammate's login lands on you.
+- **The team's Canva or social-media account.** Email-code login only. Three people, one mailbox, and whoever owns it is the bottleneck.
 
-> InboxShare does not create disposable mailboxes, generate TOTP codes, bypass verification, or circumvent account-sharing restrictions. It displays emails received through forwarding.
+Use InboxShare within each service's sharing rules: the people in your household, or the seats on your team plan.
 
-## Streaming verification email use cases
+## 2. The problem
 
-Account owners sometimes receive sign-in codes while authorized family members are using a streaming service. Instead of manually copying and sending each email, the owner can selectively forward verification messages to InboxShare. Authorized viewers can open the shared, read-only URL to check the latest mail.
+1. **The code is in the wrong inbox.** The service emails the account holder, but the person who needs the code is on another device, often in another place.
+2. **Codes expire fast.** Most are valid for 10 to 15 minutes. Forward it late and the other person has to request a new one.
+3. **The obvious fix is dangerous.** Giving family or teammates your mailbox password hands them the password-reset links for every account you own.
 
-### Netflix verification codes
+Existing workarounds all fail on one of these: manual forwarding is slow, shared mailboxes expose everything, and IMAP-polling tools need your mailbox password and still lag.
 
-If Netflix emails a verification code to the account owner's mailbox, configure a sender-specific forwarding rule to deliver that email to your InboxShare receiving address. Permitted household members can view the message and copy the code from the shared link without waiting for the administrator.
+## 3. The solution
 
-This does not bypass Netflix Household rules, device verification, or other account restrictions.
+InboxShare turns one address on your domain into a **read-only web page** that shows only the emails you choose to forward there, with the verification code pulled to the top.
 
-### Disney+ verification codes
+```text
+Netflix sends            Your mailbox            code@yourdomain          InboxShare                    Your family
+verification email  →   one forwarding rule  →  Cloudflare Email     →  finds the code,          →   opens the link,
+                                                 Routing                  hides the rest                reads the code
+```
 
-For permitted Disney+ household use, forward relevant sign-in or verification emails to InboxShare. Authorized family members can open the read-only inbox link to find the latest verification message or confirmation link.
+### How it works
 
-InboxShare does not change Disney+'s household or account-sharing requirements.
+1. **Forward only the verification emails.** In Gmail or Outlook, add one rule: mail from Netflix, Disney+, HBO Max, OpenAI or Anthropic goes to `code@yourdomain.com`. Everything else stays where it is.
+2. **InboxShare picks out the code.** Cloudflare Email Routing hands each message to the Worker the moment it arrives. The 4 to 8 digit code is detected and shown with a copy button; confirmation buttons in HTML mail still work. Password resets, receipts and account-security alerts are classified and hidden by default.
+3. **Send one link.** In the admin page, create a read-only link for that address with a rolling time window (last 30 minutes, 1 hour, 6 hours, 1 day, 7 days, or all retained mail). Pin it in the family chat. Revoke or delete it whenever you like.
 
-### HBO Max / Max verification emails
+### What viewers see
 
-When HBO Max or Max sends an email verification or sign-in message to the account owner, selected messages can be forwarded to the same shared inbox. Authorized members can check the received email through the fixed link.
+A mobile-friendly inbox for that one address: sender, subject, relative time, the code as a chip in the list and as a large copy button in the message, the sanitized HTML body in a sandboxed frame, and attachments as downloads. On phones the newest code sits in a card at the top. The page refreshes every 30 seconds.
 
-Email-based authentication flows vary by service, account, and region; InboxShare only displays messages actually received. It does not generate codes or override any service's terms.
+### What InboxShare does not do
 
-### Teams and other services
+- It does not send, reply or forward mail to viewers. The page is read-only.
+- It does not connect to your Gmail or Outlook. No OAuth, no IMAP, no mailbox password. It only receives what your forwarding rule sends.
+- It does not generate OTP or TOTP codes. It displays codes found in emails you actually received.
+- It is not a disposable-email service, and it does not change any service's household or account-sharing rules.
 
-Teams that are authorized to share an account can use the same workflow for email-based sign-in codes and confirmation messages. Create narrowly scoped forwarding filters to prevent unrelated personal or security-sensitive email from reaching the shared viewer.
-
-**Protect shared links:** A verification code can authorize account access. Only distribute links to trusted, authorized members; keep sensitive-message filtering enabled and revoke links when access is no longer needed.
-
-## Features
+### Features
 
 | Feature | Description |
 | --- | --- |
-| Read-only shared inbox | Fixed `/s/<key>` link. Viewers can read, but cannot send, reply to, or delete email. |
-| Email OTP detection | Detects likely 4–8 digit email verification codes and offers a prominent copyable code. |
-| Time-window controls | Show messages from the last 30 minutes, 1 hour, 6 hours, 1 day, 7 days, or all retained messages. |
-| Expiry and revocation | Set link expiration and revoke shared access. |
-| Sensitive email filtering | Password resets, billing, and account-security messages are hidden from viewers by default. |
-| Mobile-friendly UI | Responsive message list and details, refreshed every 30 seconds. |
-| English and Chinese | English by default, with a language switch on admin and shared inbox pages; deployment setting `LOCALE` can be `en` or `zh-CN`. |
-| Cloudflare-based hosting | Uses Email Routing, Workers, D1, R2, and scheduled cleanup. |
+| Read-only share links | `/s/<key>` pages; viewers cannot send, reply or delete. Keys are `<mailbox user><letter><10 random characters>`; the random tail is the access control. |
+| Code detection | 4 to 8 digit verification codes detected on arrival; conservative rules avoid years and order numbers. |
+| Rolling time windows | Each link shows only recent mail; old codes scroll out on their own. |
+| Expiry, revoke, delete | Optional expiry date, instant revoke (record kept) or delete (record removed). |
+| Sensitive-mail isolation | Password reset, billing and account-security emails never appear unless a link explicitly opts in. |
+| English and Chinese | `LOCALE` sets the default; viewers and admins can switch in the UI. |
+| Serverless | One Cloudflare Worker with D1, R2 and a daily cleanup cron. No VPS, no SMTP server, no port 25. |
 
-## Architecture
+## 4. Deployment plan
 
-```text
-Existing Gmail / Outlook / other mailbox
-          │ selective auto-forwarding
-          ▼
-  share@yourdomain.com
-          │
-          ▼
- Cloudflare Email Routing
-          │
-          ▼
- InboxShare Email Worker
-    ├── Parse + classify mail and detect codes
-    ├── D1: messages + share links
-    ├── R2: attachments + large bodies
-    ├── /admin: create/revoke/delete links (ADMIN_TOKEN)
-    └── /s/<key>: read-only viewer
-          │
-          ▼
- Authorized household or team members
-```
+Total time: about 20 minutes. You need a Cloudflare account with a domain on it, and for the CLI route Node.js 22+ and pnpm.
 
-**Important distinction:** The forwarding destination (`share@yourdomain.com`) receives email. The share URL (`https://your-host/s/<key>`) is a web page for viewing authorized messages. They are not interchangeable.
+### Step 1: Deploy the Worker (pick one)
 
-## Deployment
+**A. Deploy to Cloudflare button** (easiest)
 
-### Prerequisites
-
-- Cloudflare account and a domain managed by Cloudflare
-- Node.js 22 or later and pnpm for CLI deployment
-- A long, randomly generated `ADMIN_TOKEN` (at least 16 characters)
-
-### Option 1: Deploy to Cloudflare
-
-Use the [Deploy to Cloudflare button](https://deploy.workers.cloudflare.com/?url=https://github.com/funcin/inboxshare) and follow the setup flow.
-
-From your deployed copy of the repository, apply migrations and set the secret:
+Click the [Deploy to Cloudflare](https://deploy.workers.cloudflare.com/?url=https://github.com/funcin/inboxshare) button and follow the flow. It creates the Worker, the D1 database and the R2 bucket. Then, from the repository it created for you:
 
 ```bash
 pnpm install
 pnpm wrangler d1 migrations apply DB --remote
-pnpm wrangler secret put ADMIN_TOKEN
+pnpm wrangler secret put ADMIN_TOKEN     # a random string, 16+ characters
 ```
 
-Continue with [Email Routing](#configure-email-routing).
+**B. Fork + GitHub Actions**
 
-### Option 2: GitHub Actions
+1. Fork this repository.
+2. In **Settings → Secrets and variables → Actions** add the variable `DEPLOY_WITH_ACTIONS=true` and the secrets `CLOUDFLARE_API_TOKEN` (Workers Scripts, D1, R2 and Email Routing: Edit), `CLOUDFLARE_ACCOUNT_ID` and `ADMIN_TOKEN`.
+3. Push to `main` or run the workflow manually. It installs, migrates, deploys and sets the admin secret. Without `DEPLOY_WITH_ACTIONS` the workflow is skipped, so forks do not fail by default.
 
-1. Fork the repository.
-2. In **Settings → Secrets and variables → Actions**, add:
-   - Variable `DEPLOY_WITH_ACTIONS=true`
-   - Secrets `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and `ADMIN_TOKEN`
-3. Give the API token the required Cloudflare permissions for Workers, D1, R2, and Email Routing.
-4. Push to `main` or manually run the workflow.
-
-The workflow installs dependencies, applies migrations, deploys, and configures the admin secret. It runs only when `DEPLOY_WITH_ACTIONS` is enabled.
-
-### Option 3: Wrangler CLI
+**C. Wrangler CLI**
 
 ```bash
 git clone https://github.com/funcin/inboxshare.git
 cd inboxshare
 pnpm install
 pnpm wrangler login
-pnpm run deploy
+pnpm run deploy                      # applies D1 migrations, then deploys
 pnpm wrangler secret put ADMIN_TOKEN
 ```
 
-The top-level `wrangler.jsonc` is a reusable template. The included `env.production` contains the author's deployment-specific domains and resource identifiers. Replace or remove that environment before using a production environment of your own.
+The top-level `wrangler.jsonc` is a generic template with no resource ids. `env.production` is the author's own instance; delete it or replace it with yours.
 
-### Configure Email Routing
+### Step 2: Point an address at the Worker
 
-All deployment options require this step.
+1. **Cloudflare Dashboard → your domain → Email → Email Routing**, enable it (MX and SPF records are added for you).
+2. **Routing rules → Create address**, for example `code@yourdomain.com`. Action: **Send to a Worker** → your InboxShare Worker.
+3. Optional: set the **Catch-all** to the same Worker so any address on the domain (`disney@`, `team@`) becomes its own shared inbox without further setup.
 
-1. Open **Cloudflare Dashboard → your domain → Email → Email Routing** and enable it. Complete the MX/SPF DNS setup.
-2. Under **Routing rules**, create a receiving address, for example `share@yourdomain.com`.
-3. Choose **Send to a Worker** and select the InboxShare Worker.
-4. Configure your original mailbox to forward **only the relevant senders or message types** to that address.
-5. Send a test email.
-6. Visit `https://<your-worker-host>/admin`, enter `ADMIN_TOKEN`, select the receiving address, and create a share link.
-7. Open the `/s/<key>` link to verify which messages are visible.
+### Step 3: Forward the right emails from your mailbox
 
-You can optionally forward an additional copy to a verified destination using `FORWARD_TO`.
+- **Gmail:** Settings → Forwarding → add `code@yourdomain.com` (the confirmation email lands in InboxShare; create a link in step 4 to read its code). Then Filters → create: `from:(netflix.com OR disneyplus.com OR openai.com)` → *Forward it to* that address.
+- **Outlook:** Settings → Mail → Rules → condition on sender or subject → action *Forward to*.
+- **iCloud, QQ Mail, 163 and others:** the same rule-based forwarding under Rules or Auto-forward.
 
-### Language selection
+Keep the rule narrow. Only the verification emails need to leave your mailbox.
 
-The interface defaults to **English**. On the admin and shared inbox pages, use the **English / 中文** links to switch the UI language. The choice is kept in the page URL using `?lang=en` or `?lang=zh-CN`; it does not change what email is accessible or the original share key. The homepage also provides English (`/en`) and Chinese (`/zh`) versions.
+### Step 4: Create a share link
 
-You can configure the deployment default using `LOCALE`.
+Open `https://<your-worker-host>/admin`, enter `ADMIN_TOKEN`, pick the receiving address, choose a time window and an optional expiry and label, click **Create link**. Copy the `/s/<key>` URL and send it to the people who need it.
 
-### Custom domain and language
+### Step 5: Verify
 
-Configure your own route and public URL in `wrangler.jsonc`:
+Send a test email through the forwarding rule and open the share link on a phone. You should see the message within seconds with the code at the top. Password-reset or billing emails sent the same way should not appear.
+
+### Optional: custom domain and language
 
 ```jsonc
 "routes": [{ "pattern": "inbox.yourdomain.com", "custom_domain": true }],
@@ -167,87 +137,70 @@ Configure your own route and public URL in `wrangler.jsonc`:
 }
 ```
 
-Keep the required resource bindings and other variables from the existing config. A custom domain route can change access to the `workers.dev` endpoint.
+Share links use `PUBLIC_BASE_URL`. `LOCALE` is `en` or `zh-CN`; every page also has a language switch. Note that adding a custom domain route disables the `workers.dev` hostname by default.
 
 ## Configuration reference
 
 | Setting | Location | Description |
 | --- | --- | --- |
-| `ADMIN_TOKEN` | Wrangler secret / `.dev.vars` | Required admin token, minimum 16 characters. Admin endpoints return 503 when missing. |
-| `RETENTION_DAYS` | `vars` | Days to retain email and attachments; default `30`. |
-| `PUBLIC_BASE_URL` | `vars` | Base URL in share links; defaults to the current request origin if empty. |
-| `FORWARD_TO` | `vars` | Optional additional destination, verified in Cloudflare Email Routing. |
-| `LOCALE` | `vars` | `en` (default) or `zh-CN`; visitors can switch languages in the UI. |
-| `WAITLIST_FROM` | `vars` | Optional. The landing page has a "hosted version" email signup stored in the D1 `waitlist` table. To also get an email per signup, set this sender address on your domain, add a `send_email` binding named `EMAIL`, and store the recipient with `wrangler secret put WAITLIST_TO` (it must be a verified Email Routing destination). Leave unset to store only. |
+| `ADMIN_TOKEN` | secret / `.dev.vars` | Required, 16+ characters. Admin endpoints return 503 without it. |
+| `RETENTION_DAYS` | `vars` | Days to keep mail and attachments; default `30`. A daily cron deletes older data from D1 and R2. |
+| `PUBLIC_BASE_URL` | `vars` | Base URL for generated share links; empty = request origin. |
+| `FORWARD_TO` | `vars` | Optional: also forward every received email to this verified Email Routing destination. |
+| `LOCALE` | `vars` | `en` (default) or `zh-CN`. |
+| `WAITLIST_FROM` | `vars` | Optional. The landing page's "hosted version" signup is stored in the D1 `waitlist` table. To also get an email per signup, set this sender on your domain, add a `send_email` binding named `EMAIL`, and store the recipient with `wrangler secret put WAITLIST_TO` (a verified Email Routing destination). Unset = store only. |
 | `WAITLIST_TO` | secret | Recipient for waitlist notifications; see `WAITLIST_FROM`. |
-
-A daily scheduled Worker task deletes messages and attachments beyond the retention period.
 
 ## Local development
 
 ```bash
 pnpm install
-cp .dev.vars.example .dev.vars
-# Set a unique ADMIN_TOKEN in .dev.vars (16+ characters)
+cp .dev.vars.example .dev.vars    # set a 16+ character ADMIN_TOKEN
 pnpm db:migrate:local
-pnpm dev
-```
-
-Open `http://127.0.0.1:8787/admin`. To send a sample message and validate the classification rules:
-
-```bash
-pnpm test:email
-pnpm test:classify
+pnpm dev                          # http://127.0.0.1:8787
+pnpm test:email                   # delivers scripts/fixtures/sample.eml to the local Worker
+pnpm test:classify                # code detection and classification cases
 pnpm typecheck
 ```
 
-Create a share link in the admin dashboard and open `/s/<key>` to inspect the read-only view.
+Open `/admin`, create a link for `share@example.com`, then open `/s/<key>` on desktop and phone widths.
 
 ## Security and privacy
 
-**Anyone with a valid share URL can access the messages permitted by that link. Treat it as a secret.**
+**Anyone with a valid share URL can read the messages that link permits. Treat the URL as a secret.**
 
-- Share keys are `<mailbox user><sequence letter><10 random characters>`, for example `hiAK7qM2xP9aB`: the prefix is for recognition, the random tail is the access control. Labels are admin-only and never part of the URL. Links can expire, be revoked or be deleted.
-- Rolling windows and `RETENTION_DAYS` constrain message visibility.
-- Password resets, billing, and account-security changes are excluded by default. Administrators can explicitly allow them, so only share links with people you trust.
-- Mail HTML is sanitized in the browser and rendered in a sandboxed iframe with restrictive CSP; remote images are blocked.
-- Attachments download rather than execute inline; active-content file formats use `application/octet-stream`.
-- Responses use `no-store`, `noindex`, and `no-referrer` policies.
-- Admin access uses `ADMIN_TOKEN`; it is not stored in the repository.
+- Share keys end in 10 random alphanumeric characters (about 60 bits). The readable prefix is for recognition only. Labels are admin-only and never part of the URL.
+- Links can expire, be revoked or be deleted; rolling windows and `RETENTION_DAYS` bound what is visible.
+- Password resets, billing and account-security emails are hidden unless an admin enables them for a specific link. Only do that for people you fully trust.
+- Email HTML is sanitized in the browser and rendered in a sandboxed iframe with its own strict CSP; scripts, forms and remote images are stripped. The pages themselves load no third-party resources.
+- Attachments are always served as downloads; HTML, SVG, XML and script types are forced to `application/octet-stream`.
+- Every page is served with `no-store`, `noindex` and `no-referrer`; only the landing page is indexable.
+- `ADMIN_TOKEN` lives in a Worker secret, never in the repository.
 
-**Deployment warning:** Public viewer endpoints have no built-in rate limiting. Consider a Cloudflare rate-limiting rule for `/api/s/*`. Only forward emails required for your use case. Even a read-only message can contain an actionable sign-in or account-management link.
+There is no built-in rate limiting on the public viewer API. Consider a Cloudflare rate-limiting rule for `/api/s/*`.
 
 ## Limitations
 
-- Cloudflare Email Workers impose size limits on incoming messages, approximately 25 MB including attachments.
-- Large HTML bodies use R2; inline `cid:` images are not displayed.
-- Forwarding and DMARC behavior differs across mail providers; test delivery from each sender you need.
-- Cloudflare plan usage and charges depend on your account and applicable limits.
-- InboxShare does not override streaming platform household policies or other account-sharing terms.
+- Cloudflare Email Workers accept messages up to roughly 25 MB including attachments.
+- Inline `cid:` images are not displayed; large HTML bodies are stored in R2.
+- Forwarding and DMARC behaviour differs between providers; test each sender you rely on.
+- Cloudflare usage limits and charges depend on your plan.
 
 ## FAQ
 
-**Is this a temporary email service?** No. It uses an email address on a domain you control and can receive messages forwarded from your existing mailbox.
+**Is this a temporary-email service?** No. It uses an address on a domain you control and only shows mail forwarded from your existing mailbox.
 
-**Does it connect directly to my Gmail account?** No Gmail OAuth is required for the forwarding workflow. You set forwarding rules at your email provider.
+**Does it read my Gmail?** No. There is no OAuth and no IMAP. Your provider's forwarding rule is the only connection.
 
-**Does it generate OTPs or TOTP codes?** No. It detects likely codes inside received emails.
+**Does it generate codes?** No. It detects codes inside emails you actually received.
 
-**Can viewers reply or manage my mailbox?** No. The shared page is read-only and does not grant access to the original mailbox. However, viewing verification emails can expose sensitive credentials, so configure filters carefully.
+**Can viewers reply or manage my mailbox?** No. The page is read-only and has no access to the original mailbox. A verification email can still authorize a login, so share links only with people you trust.
 
-## 中文简介
+**Does it change Netflix's household rules?** No. Use it with the people in your household, within each service's terms.
 
-**InboxShare：把指定验证邮件转发到共享收件箱，通过固定的只读链接让授权成员自助查看验证码。**
+## Hosted version
 
-例如，家庭或团队共同管理订阅服务时，管理员无需反复打开邮箱并人工分发登录验证码。用户只需在原邮箱设置过滤与转发规则，让相关邮件到达自己域名下的接收地址。随后在 InboxShare 管理页面创建分享链接，成员即可打开网页查看最近的邮件。
-
-- 不共享原始邮箱密码，访客无需注册或安装 App。
-- 自动识别邮件中的验证码，支持复制。
-- 可配置链接有效期、撤销链接及邮件可见时间窗口。
-- 密码重置、账单和账号安全邮件默认不对访客展示。
-- 使用 Cloudflare Workers、Email Routing、D1 和 R2 自行部署，默认英文，管理页面和共享页面可切换中文。
-
-典型场景包括 Netflix、Disney+、HBO Max 等服务的验证邮件共享，仅限符合平台规则的授权用户。\n\n本工具不绕过平台验证机制。账号使用仍需遵守服务提供商的相关条款。部署步骤、配置和安全说明见上面的英文文档。
+Prefer not to run it yourself? Leave your email at the bottom of [inboxshare.app](https://inboxshare.app) and we will reply within 24 hours.
 
 ## License
 

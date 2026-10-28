@@ -33,7 +33,7 @@ Worker 解析、识别验证码、分类后把元数据/正文存 D1、附件存
 
 ## 部署方式
 
-见 `README.md`「部署」：Deploy 按钮 / fork + Actions / 本地 wrangler 三选一，再在 Email Routing 把地址指向 Worker。
+见 `README.md`（英文）/ `README.zh-CN.md`（中文）的「Deployment plan / 部署计划」：Deploy 按钮 / fork + Actions / 本地 wrangler 三选一，再在 Email Routing 把地址指向 Worker。两份 README 结构一致（场景 / 问题 / 解决方案 / 部署计划），改一份要同步另一份。
 作者实例：Workers Builds 接 `funcin/inboxshare` 的 `main`，部署命令 `pnpm run deploy:production`。
 
 ## 验证命令
