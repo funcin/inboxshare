@@ -61,7 +61,6 @@ function render(env: Env, requestUrl: string, locale: Locale, path: string): str
     canonical,
     githubUrl: GITHUB_URL,
     deployUrl: DEPLOY_URL,
-    guideUrl: `${GITHUB_URL}#deployment`,
     ogImage: `${base}/${locale === 'en' ? 'og-image.png' : 'og-image-zh.png'}`,
     switchLang: locale === 'en' ? 'zh-CN' : 'en',
   }).replace('@@JSONLD@@', jsonLd(dict, locale, canonical));

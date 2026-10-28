@@ -170,13 +170,6 @@
   .faq details p { margin-top: 10px; }
   .faq .intro h2 { margin-bottom: 0; }
 
-  .cta { border: 1px solid var(--is-line); border-radius: 18px; background: var(--is-ground); padding: 56px; display: flex; flex-wrap: wrap; gap: 40px; align-items: center; }
-  .cta .intro { flex: 1 1 420px; min-width: 0; }
-  .cta .intro h2 { margin: 0 0 12px; font-size: clamp(28px, 3.2vw, 36px); line-height: 1.15; letter-spacing: -0.03em; }
-  .cta .intro p { font-size: 17px; }
-  .cta .side { flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
-  .cta pre { margin: 0; background: var(--is-dark-bg); color: var(--is-dark-text); border-radius: 10px; padding: 16px 18px; font-size: 13px; line-height: 1.7; overflow-x: auto; }
-  .cta .btns { display: flex; gap: 12px; flex-wrap: wrap; }
 
   .wait { display: flex; gap: 12px; flex-wrap: wrap; }
   .wait input[type="email"] { flex: 1 1 260px; min-height: 48px; padding: 0 14px; border: 1px solid var(--is-line-strong); border-radius: 10px; background: var(--is-surface); color: var(--is-ink); font: inherit; font-size: 16px; }
@@ -209,7 +202,6 @@
     .flow { margin-bottom: 36px; }
     .steps { gap: 28px; }
     .rows .row h3 { flex-basis: 100%; }
-    .cta { padding: 28px 20px; gap: 24px; }
     footer .langs { margin-left: 0; }
   }
   @media (max-width: 390px) {
@@ -373,7 +365,7 @@
     </div>
   </section>
 
-  <section id="hosted" class="band ground">
+  <section id="hosted" class="band ground" style="border-bottom: 0">
     <div class="wrap split">
       <div class="intro">
         <div class="eyebrow">{{waitEyebrow}}</div>
@@ -392,25 +384,6 @@
     </div>
   </section>
 
-  <section class="band" style="border-bottom: 0">
-    <div class="wrap">
-      <div class="cta">
-        <div class="intro">
-          <h2>{{ctaTitle}}</h2>
-          <p>{{ctaSub}}</p>
-        </div>
-        <div class="side">
-          <pre class="mono">$ git clone {{githubUrl}}
-$ cd inboxshare &amp;&amp; pnpm install
-$ pnpm run deploy</pre>
-          <div class="btns">
-            <a class="btn primary" href="{{deployUrl}}" rel="noopener">{{ctaDeploy}}</a>
-            <a class="btn ghost" href="{{guideUrl}}" rel="noopener">{{ctaGuide}}</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 </main>
 
 <footer>
