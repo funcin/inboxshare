@@ -80,7 +80,7 @@ Existing Gmail / Outlook / other mailbox
     ├── Parse + classify mail and detect codes
     ├── D1: messages + share links
     ├── R2: attachments + large bodies
-    ├── /admin: create/revoke links (ADMIN_TOKEN)
+    ├── /admin: create/revoke/delete links (ADMIN_TOKEN)
     └── /s/<key>: read-only viewer
           │
           ▼

@@ -40,7 +40,9 @@ export function sequenceLabel(index: number): string {
  */
 export function buildShareKey(mailbox: string, label: string | null, existingCount: number): string {
   const local = slugPart(mailbox.split('@')[0] ?? '', 20) || 'inbox';
-  const middle = slugPart(label ?? '', 16) || sequenceLabel(existingCount);
+  let middle = slugPart(label ?? '', 16);
+  // 备注和邮箱用户名一样（如 netflix-code 配备注 netflixcode）就不重复拼一遍，改用序号
+  if (!middle || middle === local) middle = sequenceLabel(existingCount);
   return `${local}${middle}${randomAlnum(10)}`;
 }
 

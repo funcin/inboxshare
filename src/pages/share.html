@@ -42,6 +42,13 @@
   .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 550; color: var(--is-ink-2); border: 1px solid var(--is-line); border-radius: 6px; padding: 4px 10px; white-space: nowrap; }
   .icon-btn { width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--is-line); background: var(--is-surface); border-radius: 8px; flex: 0 0 auto; }
   .icon-btn:hover { border-color: var(--is-ink); }
+  .icon-btn:disabled { cursor: default; }
+  /* 手动刷新：图标转圈、按钮描边变强调色，请求结束后列表头显示“已刷新” */
+  .icon-btn.busy { border-color: var(--is-accent); color: var(--is-accent); }
+  .icon-btn.busy svg { animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .icon-btn.busy svg { animation: none; } }
+  .list-head span.ok { color: var(--is-ok); font-weight: 600; }
   .lang { display: flex; gap: 2px; font-size: 13px; border: 1px solid var(--is-line); border-radius: 8px; padding: 3px; }
   .lang a { padding: 4px 10px; border-radius: 5px; color: var(--is-muted); text-decoration: none; }
   .lang a[aria-current="page"] { background: var(--is-ink); color: var(--is-surface); }
@@ -243,6 +250,7 @@
   var current = null;
   var currentCode = null;
   var latestCode = null;
+  var countText = '';
 
   // 语言切换：保留当前路径，只改 lang 参数；当前语言标 aria-current
   [['switch-en', 'en'], ['switch-zh', 'zh-CN'], ['switch-en-m', 'en'], ['switch-zh-m', 'zh-CN']].forEach(function (p) {
@@ -356,7 +364,8 @@
     $('mailbox').textContent = data.mailbox;
     $('window-label').textContent = windowLabel(data.windowMinutes);
     document.title = (data.label ? data.label + ' · ' : '') + T.title;
-    $('count').textContent = fmt(T.countFmt, { n: data.items.length }) + ' · ' + T.autoRefresh;
+    countText = fmt(T.countFmt, { n: data.items.length }) + ' · ' + T.autoRefresh;
+    if (!refreshBusy) $('count').textContent = countText;
     $('loading').classList.add('hidden');
     $('empty').classList.toggle('hidden', data.items.length > 0);
     var hiddenN = data.hiddenSensitive || 0;
@@ -385,10 +394,34 @@
   }
 
   function load() {
-    fetch(api + '/messages', { cache: 'no-store' }).then(function (r) {
+    return fetch(api + '/messages', { cache: 'no-store' }).then(function (r) {
       if (r.status === 403) { showDenied(); return null; }
       return r.json();
-    }).then(function (d) { if (d) render(d); }).catch(function () { $('loading').textContent = T.loadFailed; $('loading').style.color = 'var(--is-danger)'; });
+    }).then(function (d) { if (d) render(d); return !!d; }).catch(function () { $('loading').textContent = T.loadFailed; $('loading').style.color = 'var(--is-danger)'; return false; });
+  }
+
+  // 手动刷新要让人看得到：转圈 + “正在刷新…”至少 500ms，完成后列表头显示 1.5 秒“已刷新”再恢复
+  var refreshBusy = false;
+  var refreshTimer = null;
+  function manualRefresh() {
+    var btn = $('refresh');
+    if (refreshBusy) return;
+    refreshBusy = true;
+    clearTimeout(refreshTimer);
+    btn.disabled = true; btn.classList.add('busy');
+    var count = $('count');
+    count.classList.remove('ok');
+    count.textContent = T.refreshing;
+    $('live').textContent = T.refreshing;
+    var minSpin = new Promise(function (res) { setTimeout(res, 500); });
+    Promise.all([load(), minSpin]).then(function (r) {
+      refreshBusy = false;
+      btn.disabled = false; btn.classList.remove('busy');
+      if (!r[0]) { count.textContent = countText; return; }
+      count.textContent = T.refreshed; count.classList.add('ok');
+      $('live').textContent = T.refreshed;
+      refreshTimer = setTimeout(function () { count.textContent = countText; count.classList.remove('ok'); }, 1500);
+    });
   }
 
   function open(id) {
@@ -449,7 +482,7 @@
     if (detailPushed) { detailPushed = false; history.back(); } else closeDetailPane();
   });
   window.addEventListener('popstate', closeDetailPane);
-  $('refresh').addEventListener('click', load);
+  $('refresh').addEventListener('click', manualRefresh);
   $('copy').addEventListener('click', function () {
     var t = $('mailbox').textContent;
     if (t && t !== '—') copyText(t, 'copy-label', T.copied, T.copyAddress);

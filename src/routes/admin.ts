@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { countLinks, createLink, listLinks, listMailboxes, revokeLink } from '../db';
+import { countLinks, createLink, deleteLink, listLinks, listMailboxes, revokeLink } from '../db';
 import { ADMIN_DICTS, renderPage, resolveLocale } from '../i18n';
 import adminPage from '../pages/admin.html';
 import { WINDOW_OPTIONS, type Env, type ShareLinkRow } from '../types';
@@ -99,9 +99,17 @@ export function registerAdminRoutes(app: App): void {
     return c.json({ link: withUrl(link, publicBase(c.env, c.req.url)) }, 201);
   });
 
-  app.delete('/api/admin/links/:key', async (c) => {
+  // 撤销：记录保留、状态改 revoked，链接立即失效
+  app.post('/api/admin/links/:key/revoke', async (c) => {
     const ok = await revokeLink(c.env.DB, c.req.param('key'), Date.now());
     if (!ok) return c.json({ error: 'not_found_or_not_active' }, 404);
+    return c.json({ ok: true });
+  });
+
+  // 删除：记录从 D1 移除，链接立即失效，管理页不再显示；邮件本身不受影响
+  app.delete('/api/admin/links/:key', async (c) => {
+    const ok = await deleteLink(c.env.DB, c.req.param('key'));
+    if (!ok) return c.json({ error: 'not_found' }, 404);
     return c.json({ ok: true });
   });
 }

@@ -92,18 +92,24 @@
   .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   table { width: 100%; border-collapse: collapse; }
   th { text-align: left; font-weight: 600; font-size: 12px; color: var(--is-muted); letter-spacing: 0.04em; text-transform: uppercase; padding: 10px 12px; border-bottom: 1px solid var(--is-line); background: var(--is-ground); white-space: nowrap; }
-  td { padding: 12px; border-bottom: 1px solid var(--is-line); font-size: 14px; white-space: nowrap; vertical-align: middle; }
+  /* 单元格允许换行，保证操作列在桌面上不被挤出卡片；状态胶囊和操作按钮本身不换行 */
+  td { padding: 12px; border-bottom: 1px solid var(--is-line); font-size: 14px; vertical-align: middle; }
   th:first-child, td:first-child { padding-left: 20px; }
   th:last-child, td:last-child { padding-right: 20px; }
   tr:last-child td { border-bottom: 0; }
   tr.off td { color: var(--is-muted); }
   td .lbl { font-weight: 600; }
   td .key { font-size: 12px; color: var(--is-muted); }
-  td .key a { color: inherit; text-decoration: none; display: inline-block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; }
+  td .key a, td .mb { color: inherit; text-decoration: none; display: block; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   td .key a:hover { text-decoration: underline; }
+  td .mb { font-size: 12px; color: var(--is-muted); }
+  td .lbl { max-width: 220px; overflow-wrap: anywhere; }
   td.mono { font-size: 13px; }
   td.muted { color: var(--is-muted); }
-  td.actions { text-align: right; }
+  td.nowrap, td .pill { white-space: nowrap; }
+  td.actions { text-align: right; white-space: nowrap; }
+  td.actions .btn + .btn { margin-left: 4px; }
+  .btn.icon { width: 32px; padding: 0; }
   .tag { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 600; color: var(--is-warn-tag-ink); background: var(--is-warn-tag-bg); border-radius: 4px; padding: 1px 6px; }
   .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 10px; color: var(--is-off-ink); background: var(--is-chip); }
   .pill.active { color: var(--is-ok-ink); background: var(--is-ok-bg); }
@@ -167,7 +173,7 @@
       <div class="tables">
         <section class="card" aria-labelledby="links-h">
           <div class="thead"><h2 id="links-h">{{links}}</h2><span id="links-summary"></span></div>
-          <div class="scroll"><table><thead><tr><th>{{thLink}}</th><th>{{thMailbox}}</th><th>{{thWindow}}</th><th>{{thStatus}}</th><th>{{thExpires}}</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody id="link-rows"></tbody></table></div>
+          <div class="scroll"><table><thead><tr><th>{{thLink}}</th><th>{{thWindow}}</th><th>{{thStatus}}</th><th>{{thExpires}}</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody id="link-rows"></tbody></table></div>
           <div class="empty hidden" id="link-empty">{{linkEmpty}}</div>
         </section>
 
@@ -192,6 +198,8 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function tpl(s, vars) { return s.replace(/\{(\w+)\}/g, function (_, k) { return vars[k] != null ? vars[k] : ''; }); }
   function fmt(ms) { return ms ? new Date(ms).toLocaleString(LOCALE, { hour12: false, year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'; }
+  // 链接表格里用紧凑的数字日期，避免中文长日期撑宽过期列
+  function fmtShort(ms) { return ms ? new Date(ms).toLocaleString(LOCALE, { hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'; }
   function win(m) { return !m ? T.winAll : m < 60 ? tpl(T.winMin, { n: m }) : m < 1440 ? tpl(T.winHour, { n: m / 60 }) : tpl(T.winDay, { n: m / 1440 }); }
   function statusLabel(s) { return s === 'active' ? T.statusActive : s === 'revoked' ? T.statusRevoked : s === 'expired' ? T.statusExpired : s; }
   function errorLabel(code) {
@@ -254,11 +262,13 @@
         var on = l.status === 'active';
         return '<tr' + (on ? '' : ' class="off"') + '><td>' + (l.label ? '<div class="lbl">' + esc(l.label) + '</div>' : '')
           + '<div class="key mono"><a href="' + esc(l.url) + '" target="_blank" rel="noopener" title="' + esc(l.url) + '">/s/' + esc(l.key) + '</a></div>'
+          + '<div class="mb mono" title="' + esc(l.mailbox) + '">' + esc(l.mailbox) + '</div>'
           + (l.show_sensitive ? '<span class="tag">' + esc(T.tagSensitive) + '</span>' : '') + '</td>'
-          + '<td class="mono">' + esc(l.mailbox) + '</td><td>' + esc(win(l.window_minutes)) + '</td>'
+          + '<td class="nowrap">' + esc(win(l.window_minutes)) + '</td>'
           + '<td><span class="pill ' + esc(l.status) + '">' + esc(statusLabel(l.status)) + '</span></td>'
-          + '<td class="muted">' + (l.expires_at ? esc(fmt(l.expires_at)) : (on ? esc(T.never) : '—')) + '</td>'
-          + '<td class="actions">' + (on ? '<button type="button" class="btn sm" data-copy="' + esc(l.url) + '">' + esc(T.copy) + '</button> <button type="button" class="btn sm danger" data-revoke="' + esc(l.key) + '">' + esc(T.revoke) + '</button>' : '') + '</td></tr>';
+          + '<td class="muted nowrap">' + (l.expires_at ? esc(fmtShort(l.expires_at)) : (on ? esc(T.never) : '—')) + '</td>'
+          + '<td class="actions">' + (on ? '<button type="button" class="btn sm" data-copy="' + esc(l.url) + '">' + esc(T.copy) + '</button><button type="button" class="btn sm danger" data-revoke="' + esc(l.key) + '">' + esc(T.revoke) + '</button>' : '')
+          + '<button type="button" class="btn sm danger icon" data-delete="' + esc(l.key) + '" aria-label="' + esc(T.delete) + '" title="' + esc(T.delete) + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v6M14 11v6"></path></svg></button></td></tr>';
       }).join('');
     });
   }
@@ -289,11 +299,14 @@
   });
 
   document.addEventListener('click', function (e) {
-    var t = e.target.closest ? e.target.closest('[data-revoke],[data-copy]') : null;
+    var t = e.target.closest ? e.target.closest('[data-revoke],[data-delete],[data-copy]') : null;
     if (!t) return;
     if (t.dataset.revoke) {
       if (!confirm(T.confirmRevoke)) return;
-      req('/api/admin/links/' + encodeURIComponent(t.dataset.revoke), { method: 'DELETE' }).then(refresh);
+      req('/api/admin/links/' + encodeURIComponent(t.dataset.revoke) + '/revoke', { method: 'POST' }).then(refresh);
+    } else if (t.dataset.delete) {
+      if (!confirm(T.confirmDelete)) return;
+      req('/api/admin/links/' + encodeURIComponent(t.dataset.delete), { method: 'DELETE' }).then(refresh);
     } else if (t.dataset.copy && navigator.clipboard) {
       navigator.clipboard.writeText(t.dataset.copy).then(function () { t.textContent = T.copied; setTimeout(function () { t.textContent = T.copy; }, 1500); });
     }

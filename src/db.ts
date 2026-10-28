@@ -118,6 +118,12 @@ export async function revokeLink(db: D1Database, key: string, now: number): Prom
   return (res.meta.changes ?? 0) > 0;
 }
 
+/** 彻底删除一条链接（任何状态都可删）；删掉后 /s/<key> 立即 403 */
+export async function deleteLink(db: D1Database, key: string): Promise<boolean> {
+  const res = await db.prepare(`DELETE FROM share_links WHERE key = ?1`).bind(key).run();
+  return (res.meta.changes ?? 0) > 0;
+}
+
 export async function listMailboxes(
   db: D1Database,
 ): Promise<Array<{ mailbox: string; count: number; latest: number }>> {
