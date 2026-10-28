@@ -41,6 +41,8 @@
   - 踩坑：表头里 `position:absolute` 的隐藏文本会撑大 scrollWidth 造成手机横向滚动，要放在 `position:relative` 的容器内。
   - 未做：README 换 `design/brand/logo.svg`（HANDOFF §7 说明仅供外部使用，README 由站长决定）。
 
+2026-10-28 分享链接 key 改成可读格式：`邮箱用户名 + 备注（slug 化，中文等非 ASCII 丢弃后为空则用序号字母 A/B/C…）+ 10 位字母数字随机尾巴`，例如 `sharedisneyfamilyv6X5Si4Yl5`、`hiAA5ZR5179HG`。站长明确不要日期、不要连字符。随机尾巴是唯一的访问控制，不能去掉（`src/util.ts` 的 `buildShareKey`）。`public.ts` 的 key 校验最短从 16 放宽到 8，旧的 32 位随机 key 继续可用。管理页链接列改为显示完整 key（CSS 省略）。首页 Security 文案、README、CLAUDE.md 里"32 位随机 key"同步改掉。本地验证：带备注 / 无备注连续两条（F、G）/ 中文备注 / 新邮箱首条（A）四种情况，新旧 key 都能打开分享页，过短或含非法字符的 key 返回 403。
+
 未做（可选）：`/api/s/*` 的 Rate Limiting 规则；`FORWARD_TO` 目前为空，共享地址的邮件只进共享收件箱不转发。
 
 ## 审查

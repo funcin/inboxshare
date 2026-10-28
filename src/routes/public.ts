@@ -10,7 +10,8 @@ type App = Hono<{ Bindings: Env }>;
 
 /** 链接有效 → 返回该链接；否则 null。窗口起点按“现在”滚动计算 */
 async function resolveLink(db: D1Database, key: string): Promise<ShareLinkRow | null> {
-  if (!/^[A-Za-z0-9_-]{16,64}$/.test(key)) return null;
+  // 新 key 是「邮箱用户名 + 备注/序号 + 10 位随机」，最短约 12 位；旧的 32 位随机 key 也要继续可用
+  if (!/^[A-Za-z0-9_-]{8,64}$/.test(key)) return null;
   const link = await getLink(db, key);
   if (!link || link.status !== 'active') return null;
   if (link.expires_at !== null && link.expires_at <= Date.now()) return null;

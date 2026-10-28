@@ -99,7 +99,7 @@
   tr.off td { color: var(--is-muted); }
   td .lbl { font-weight: 600; }
   td .key { font-size: 12px; color: var(--is-muted); }
-  td .key a { color: inherit; text-decoration: none; }
+  td .key a { color: inherit; text-decoration: none; display: inline-block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; vertical-align: bottom; }
   td .key a:hover { text-decoration: underline; }
   td.mono { font-size: 13px; }
   td.muted { color: var(--is-muted); }
@@ -253,7 +253,7 @@
       $('link-rows').innerHTML = rows.map(function (l) {
         var on = l.status === 'active';
         return '<tr' + (on ? '' : ' class="off"') + '><td>' + (l.label ? '<div class="lbl">' + esc(l.label) + '</div>' : '')
-          + '<div class="key mono"><a href="' + esc(l.url) + '" target="_blank" rel="noopener">/s/' + esc(l.key.slice(0, 8)) + '…</a></div>'
+          + '<div class="key mono"><a href="' + esc(l.url) + '" target="_blank" rel="noopener" title="' + esc(l.url) + '">/s/' + esc(l.key) + '</a></div>'
           + (l.show_sensitive ? '<span class="tag">' + esc(T.tagSensitive) + '</span>' : '') + '</td>'
           + '<td class="mono">' + esc(l.mailbox) + '</td><td>' + esc(win(l.window_minutes)) + '</td>'
           + '<td><span class="pill ' + esc(l.status) + '">' + esc(statusLabel(l.status)) + '</span></td>'

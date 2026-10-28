@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
-import { createLink, listLinks, listMailboxes, revokeLink } from '../db';
+import { countLinks, createLink, listLinks, listMailboxes, revokeLink } from '../db';
 import { ADMIN_DICTS, renderPage, resolveLocale } from '../i18n';
 import adminPage from '../pages/admin.html';
 import { WINDOW_OPTIONS, type Env, type ShareLinkRow } from '../types';
-import { isValidMailbox, normalizeMailbox, randomKey, safeEqual } from '../util';
+import { buildShareKey, isValidMailbox, normalizeMailbox, safeEqual } from '../util';
 
 type App = Hono<{ Bindings: Env }>;
 
@@ -85,7 +85,7 @@ export function registerAdminRoutes(app: App): void {
 
     const label = (body.label ?? '').trim().slice(0, 100) || null;
     const link: ShareLinkRow = {
-      key: randomKey(32),
+      key: buildShareKey(mailbox, label, await countLinks(c.env.DB, mailbox)),
       mailbox,
       label,
       window_minutes: windowMinutes,

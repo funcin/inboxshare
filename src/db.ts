@@ -85,6 +85,12 @@ export async function listLinks(db: D1Database): Promise<ShareLinkRow[]> {
   return results;
 }
 
+/** 某邮箱已建过的链接数（含已撤销/过期），用来给没有备注的新链接编序号 */
+export async function countLinks(db: D1Database, mailbox: string): Promise<number> {
+  const row = await db.prepare(`SELECT COUNT(*) AS n FROM share_links WHERE mailbox = ?1`).bind(mailbox).first<{ n: number }>();
+  return row?.n ?? 0;
+}
+
 export async function createLink(db: D1Database, link: ShareLinkRow): Promise<void> {
   await db
     .prepare(
