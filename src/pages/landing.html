@@ -152,6 +152,7 @@
   .uses h3 { margin: 0 0 10px; font-size: 18px; }
   .uses p { font-size: 15px; }
   section.ground .uses .u { background: var(--is-surface); }
+  .probs .u { flex: 1 1 440px; }
   .prob-note { margin-top: 20px; font-size: 14px; }
   section.ground .flow li { background: var(--is-surface); }
   section.ground .flow li.end { background: var(--is-dark-bg); }
@@ -279,9 +280,10 @@
     <div class="wrap">
       <div class="eyebrow">{{probEyebrow}}</div>
       <h2 class="t">{{probTitle}}</h2>
-      <div class="uses">
+      <div class="uses probs">
         <div class="u"><h3>{{p1Title}}</h3><p>{{p1Body}}</p></div>
         <div class="u"><h3>{{p2Title}}</h3><p>{{p2Body}}</p></div>
+        <div class="u"><h3>{{p4Title}}</h3><p>{{p4Body}}</p></div>
         <div class="u"><h3>{{p3Title}}</h3><p>{{p3Body}}</p></div>
       </div>
       <p class="prob-note">{{probNote}}</p>
