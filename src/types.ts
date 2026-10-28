@@ -8,6 +8,8 @@ export interface Env {
   FORWARD_TO?: string;
   /** 分享页语言：zh-CN | en（部署时在 wrangler.jsonc 里定） */
   LOCALE?: string;
+  /** 可选：首页统计，站长 Plausible 面板里的站点名（src/analytics.ts）。留空 = 首页不打标 */
+  ANALYTICS_DOMAIN?: string;
   /** 可选：首页“想要托管版”名单的通知邮件。三者都配了才发信，否则只落库 */
   EMAIL?: SendEmail;
   WAITLIST_TO?: string;

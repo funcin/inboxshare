@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { csp } from './analytics';
 import { runCleanup } from './cleanup';
 import { handleEmail } from './email';
 import { registerAdminRoutes } from './routes/admin';
@@ -17,12 +18,9 @@ app.use('*', async (c, next) => {
   c.header('X-Content-Type-Options', 'nosniff');
   c.header('X-Frame-Options', 'DENY');
   if (!c.res.headers.has('Cache-Control')) c.header('Cache-Control', 'no-store');
-  if (c.res.headers.get('content-type')?.includes('text/html')) {
-    // 自家页面：只跑自己的内联脚本；邮件正文在 sandbox iframe + 更严的 srcdoc CSP 里渲染
-    c.header(
-      'Content-Security-Policy',
-      "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; font-src data:; connect-src 'self'; frame-src 'self' about:; base-uri 'none'; form-action 'none'",
-    );
+  // 自家页面一律严格 CSP（src/analytics.ts）；首页在 landing.ts 里自己设（配了统计时多放行 Plausible 的域）
+  if (c.res.headers.get('content-type')?.includes('text/html') && !c.res.headers.has('Content-Security-Policy')) {
+    c.header('Content-Security-Policy', csp());
   }
 });
 

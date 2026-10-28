@@ -1,4 +1,5 @@
-import { Hono } from 'hono';
+import { type Context, Hono } from 'hono';
+import { analytics } from '../analytics';
 import { addWaitlist } from '../db';
 import { renderPage, resolveLocale, type Locale } from '../i18n';
 import { isValidMailbox, normalizeMailbox } from '../util';
@@ -51,11 +52,13 @@ function jsonLd(dict: LandingDict, locale: Locale, url: string): string {
   return JSON.stringify(data).replace(/</g, '\\u003c');
 }
 
-function render(env: Env, requestUrl: string, locale: Locale, path: string): string {
+/** 首页 HTML 和它的 CSP：配了 ANALYTICS_DOMAIN 时 <head> 带 Plausible 标签、CSP 放行其域；否则是严格 CSP（src/analytics.ts） */
+function render(env: Env, requestUrl: string, locale: Locale, path: string): { html: string; csp: string } {
   const base = baseUrl(env, requestUrl);
   const dict = LANDING_DICTS[locale];
   const canonical = `${base}${path}`;
-  return renderPage(landingPage, locale, {
+  const stats = analytics(env);
+  const html = renderPage(landingPage, locale, {
     ...dict,
     baseUrl: base,
     canonical,
@@ -63,23 +66,23 @@ function render(env: Env, requestUrl: string, locale: Locale, path: string): str
     deployUrl: DEPLOY_URL,
     ogImage: `${base}/${locale === 'en' ? 'og-image.png' : 'og-image-zh.png'}`,
     switchLang: locale === 'en' ? 'zh-CN' : 'en',
-  }).replace('@@JSONLD@@', jsonLd(dict, locale, canonical));
+  })
+    .replace('@@JSONLD@@', jsonLd(dict, locale, canonical))
+    .replace('@@ANALYTICS@@', stats.head);
+  return { html, csp: stats.csp };
 }
 
 export function registerLandingRoutes(app: App): void {
   const cache = 'public, max-age=600';
-  app.get('/', (c) => {
+  const landing = (c: Context<{ Bindings: Env }>, locale: Locale, path: string) => {
+    const page = render(c.env, c.req.url, locale, path);
     c.header('Cache-Control', cache);
-    return c.html(render(c.env, c.req.url, resolveLocale(c.env.LOCALE), '/'));
-  });
-  app.get('/en', (c) => {
-    c.header('Cache-Control', cache);
-    return c.html(render(c.env, c.req.url, 'en', '/en'));
-  });
-  app.get('/zh', (c) => {
-    c.header('Cache-Control', cache);
-    return c.html(render(c.env, c.req.url, 'zh-CN', '/zh'));
-  });
+    c.header('Content-Security-Policy', page.csp);
+    return c.html(page.html);
+  };
+  app.get('/', (c) => landing(c, resolveLocale(c.env.LOCALE), '/'));
+  app.get('/en', (c) => landing(c, 'en', '/en'));
+  app.get('/zh', (c) => landing(c, 'zh-CN', '/zh'));
   // 首页“想要托管版？”：只收邮箱。website 是蜜罐字段，机器人填了就假装成功
   app.post('/api/waitlist', async (c) => {
     let body: { email?: string; locale?: string; website?: string };

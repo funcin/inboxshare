@@ -150,6 +150,7 @@ Share links use `PUBLIC_BASE_URL`. `LOCALE` is `en` or `zh-CN`; every page also 
 | `LOCALE` | `vars` | `en` (default) or `zh-CN`. |
 | `WAITLIST_FROM` | `vars` | Optional. The landing page's "hosted version" signup is stored in the D1 `waitlist` table. To also get an email per signup, set this sender on your domain, add a `send_email` binding named `EMAIL`, and store the recipient with `wrangler secret put WAITLIST_TO` (a verified Email Routing destination). Unset = store only. |
 | `WAITLIST_TO` | secret | Recipient for waitlist notifications; see `WAITLIST_FROM`. |
+| `ANALYTICS_DOMAIN` | `vars` | Optional. Your site name in a [Plausible](https://plausible.io) dashboard; the landing page then loads the Plausible script (cookie-free). The script host is set in `src/analytics.ts`. Only the landing page is tagged; share and admin pages never load third-party resources. Unset = no analytics. |
 
 ## Local development
 
@@ -172,7 +173,7 @@ Open `/admin`, create a link for `share@example.com`, then open `/s/<key>` on de
 - Share keys end in 10 random alphanumeric characters (about 60 bits). The readable prefix is for recognition only. Labels are admin-only and never part of the URL.
 - Links can expire, be revoked or be deleted; rolling windows and `RETENTION_DAYS` bound what is visible.
 - Password resets, billing and account-security emails are hidden unless an admin enables them for a specific link. Only do that for people you fully trust.
-- Email HTML is sanitized in the browser and rendered in a sandboxed iframe with its own strict CSP; scripts, forms and remote images are stripped. The pages themselves load no third-party resources.
+- Email HTML is sanitized in the browser and rendered in a sandboxed iframe with its own strict CSP; scripts, forms and remote images are stripped. Share and admin pages load no third-party resources; the landing page carries a cookie-free Plausible tag only if `ANALYTICS_DOMAIN` is set.
 - Attachments are always served as downloads; HTML, SVG, XML and script types are forced to `application/octet-stream`.
 - Every page is served with `no-store`, `noindex` and `no-referrer`; only the landing page is indexable.
 - `ADMIN_TOKEN` lives in a Worker secret, never in the repository.

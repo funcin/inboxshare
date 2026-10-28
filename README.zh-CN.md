@@ -150,6 +150,7 @@ pnpm wrangler secret put ADMIN_TOKEN
 | `LOCALE` | `vars` | `en`（默认）或 `zh-CN`。 |
 | `WAITLIST_FROM` | `vars` | 可选。首页"托管版"入口收集的邮箱存在 D1 的 `waitlist` 表。要每条都收到邮件通知，设置这个发件地址（你域名下的地址）、加一个名为 `EMAIL` 的 `send_email` 绑定，并用 `wrangler secret put WAITLIST_TO` 存收件人（必须是 Email Routing 里已验证的目标地址）。不设则只落库。 |
 | `WAITLIST_TO` | secret | 名单通知的收件人，见 `WAITLIST_FROM`。 |
+| `ANALYTICS_DOMAIN` | `vars` | 可选。你在 [Plausible](https://plausible.io) 面板里的站点名，设了首页就会加载 Plausible 脚本（无 Cookie）。脚本地址在 `src/analytics.ts` 里改。只有首页打标，分享页和管理页永远不加载第三方资源。不设则没有统计。 |
 
 ## 本地开发
 
@@ -172,7 +173,7 @@ pnpm typecheck
 - key 以 10 位随机字母数字结尾（约 60 bit），可读前缀只为好认。备注只在管理页显示，不进 URL。
 - 链接可过期、撤销、删除；滚动窗口和 `RETENTION_DAYS` 限定可见范围。
 - 密码重置、账单、账户安全邮件默认隐藏，除非管理员为某条链接显式打开。只对完全信任的人打开。
-- 邮件 HTML 在浏览器端消毒后放进带独立严格 CSP 的沙箱 iframe 渲染，脚本、表单、远程图片都被去掉。页面本身不加载任何第三方资源。
+- 邮件 HTML 在浏览器端消毒后放进带独立严格 CSP 的沙箱 iframe 渲染，脚本、表单、远程图片都被去掉。分享页和管理页不加载任何第三方资源；首页只在设置了 `ANALYTICS_DOMAIN` 时带一个无 Cookie 的 Plausible 统计标签。
 - 附件一律按下载处理，HTML、SVG、XML、脚本类型强制为 `application/octet-stream`。
 - 所有页面带 `no-store`、`noindex`、`no-referrer`，只有首页允许被索引。
 - `ADMIN_TOKEN` 存在 Worker secret 里，不进仓库。

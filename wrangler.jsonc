@@ -38,7 +38,10 @@
     // 可选：首页“想要托管版”名单的邮件通知。要发信需要三样：send_email 绑定（见 env.production）、
     // 发件地址 WAITLIST_FROM（你域名下的地址）、收件地址 WAITLIST_TO（用 `wrangler secret put WAITLIST_TO` 存，
     // 必须是 Email Routing 里已验证的目标地址）。缺任何一样则名单只存 D1 的 waitlist 表，不发信。
-    "WAITLIST_FROM": ""
+    "WAITLIST_FROM": "",
+    // 可选：首页统计。填你在 Plausible 面板里的站点名（脚本地址在 src/analytics.ts）；留空 = 首页不加统计脚本。
+    // 只有首页会打标，分享页 /s/<key> 与管理页永远不加载任何第三方资源。
+    "ANALYTICS_DOMAIN": ""
   },
 
   "observability": { "enabled": true },
@@ -70,7 +73,8 @@
         "PUBLIC_BASE_URL": "https://inboxshare.app",
         "FORWARD_TO": "",
         "LOCALE": "en",
-        "WAITLIST_FROM": "noreply@inboxshare.app"
+        "WAITLIST_FROM": "noreply@inboxshare.app",
+        "ANALYTICS_DOMAIN": "inboxshare.app"
       }
     }
   }

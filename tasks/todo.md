@@ -53,6 +53,9 @@
 
 2026-10-28 首页改为场景优先：首屏讲"换设备登录要验证码、家人找你要"的痛点（Netflix / Disney+ / HBO Max 具体例子），新增 `#problems` 三张场景卡（爸妈家新电视 / 异地"是我本人"确认按钮 / 不敢给邮箱密码）+ 合规提示"在各平台家庭共享规则内使用"；"工作方式"改成人话三步，流程条去掉 Cloudflare / Worker 等词；Serverless 与安全两节下移保留给开发者 SEO。底部部署面板已删；托管版入口文案改为"为我部署 / 24 小时内回复"。导航加"场景"，"为什么 Serverless"改为"零运维 / Zero ops"，小标题"无服务器架构 / Serverless architecture"。
 
+2026-10-28 首页接 Plausible 统计（照 seenwell/web `src/analytics.ts` 的做法）：新建 `src/analytics.ts`，`ANALYTICS_DOMAIN` 变量（顶层模板留空，env.production = `inboxshare.app`）控制是否打标，脚本 `https://data.funcin.de/js/script.outbound-links.js`（带外链点击追踪，GitHub / Deploy 按钮是首页的转化）。只有 `/`、`/en`、`/zh` 打标并在 CSP 的 script-src / connect-src 多放行该域；`/s/<key>`、`/admin` 继续用严格 CSP（统计脚本会上报整条 URL，key 不能外泄）。CSP 字符串统一由 `csp(extra)` 生成，index.ts 中间件只在页面没自己设 CSP 时兜底。首页 Security 文案 s2、两份 README（变量表 + 安全节）、CLAUDE.md 红线同步改为"分享页不加载第三方资源"。验证：typecheck、test:classify；`pnpm dev --var ANALYTICS_DOMAIN:inboxshare.app` 下 curl 三个首页都带标签 + 放行 CSP，分享页/管理页严格 CSP 且无该域；不带变量时首页无标签、严格 CSP；Chrome 真实渲染首页，脚本从 data.funcin.de 加载成功、无 CSP 拒绝，控制台只有 Plausible 自己的 "Ignoring Event: localhost"（本机不上报）。
+  站长待办：在 data.funcin.de 的 Plausible 面板里添加站点 `inboxshare.app`（经 mail.funcin.de 访问的首页也会归到这个站点名下）。
+
 未做（可选）：`/api/s/*` 的 Rate Limiting 规则；`FORWARD_TO` 目前为空，共享地址的邮件只进共享收件箱不转发。
 
 ## 审查

@@ -18,7 +18,7 @@ Worker 解析、识别验证码、分类后把元数据/正文存 D1、附件存
 - 附件下载一律 `Content-Disposition: attachment`，HTML/SVG/XML/JS 类型强制 `application/octet-stream`。
 - `ADMIN_TOKEN` 只走 `wrangler secret` / `.dev.vars`，不进 `wrangler.jsonc`，不进 git。
 - 不手动 `wrangler deploy`（全局规范）：接 Workers Builds，`git push` 即部署。
-- 页面不加载任何第三方资源（含 Google Fonts），用系统字体栈，CSP 保持 `default-src 'none'`。
+- 页面不加载任何第三方资源（含 Google Fonts），用系统字体栈，CSP 保持 `default-src 'none'`。唯一例外是首页（`/`、`/en`、`/zh`）的统计（`src/analytics.ts`）：站长自托管的 Plausible `data.funcin.de`（无 Cookie、不存标识，站点名 `wrangler.jsonc` 的 `ANALYTICS_DOMAIN`，顶层模板留空），CSP 只在首页放行它的域。分享页 `/s/<key>` 与管理页不加任何脚本与第三方资源——统计脚本会上报整条 URL，而 URL 里就是 key。
 - 文案不硬编码：分享页、管理页的字符串都在 `src/i18n.ts`，页面用 `{{key}}` 占位，服务端按 `LOCALE` 渲染。
 - 营销与文档措辞不写"绕过 household / bypass"，只写"家人、多设备、合规范围内"。
 
