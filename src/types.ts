@@ -39,6 +39,8 @@ export interface MessageRow {
   attachments_json: string;
   /** 入库时识别出的验证码，没有则 null */
   code: string | null;
+  /** 入库时识别出的操作链接（点开才拿到验证码 / 确认是我本人），没有则 null */
+  link: string | null;
   /** code | reset | billing | security | other */
   category: string;
 }
@@ -52,6 +54,7 @@ export interface MessageListRow {
   snippet: string | null;
   attachments_json: string;
   code: string | null;
+  link: string | null;
   category: string;
 }
 

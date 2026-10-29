@@ -16,9 +16,13 @@ const SECURITY =
 const BILLING =
   /\binvoice\b|\breceipt\b|payment (received|failed|declined|due|confirmation)|billing|your (order|purchase)|order (confirmation|shipped)|subscription (renewed|renewal|cancel|expir|payment)|refund|charged|账单|发票|付款|扣款|支付成功|订单|订阅(已|将)|续费|退款|收据/i;
 
+/**
+ * @param hasCode 已识别出验证码或操作链接。验证码邮件的正文结尾常带“如果不是你，请登出不认识的设备 / 更改密码”
+ *   这类安全提示（Netflix 的暂时存取码邮件就是），所以这种邮件只看主题和正文开头，不让结尾的提示把它藏起来。
+ */
 export function classify(subject: string | null, text: string | null, hasCode: boolean): Category {
   const subj = subject ?? '';
-  const body = (text ?? '').slice(0, 2000);
+  const body = (text ?? '').slice(0, hasCode ? 300 : 2000);
   const both = `${subj}\n${body}`;
   // 主题命中优先级最高；正文只在主题没结论时参考
   if (RESET.test(subj) || RESET.test(body)) return 'reset';

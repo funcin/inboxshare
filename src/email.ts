@@ -2,6 +2,7 @@ import PostalMime from 'postal-mime';
 import { classify } from './classify';
 import { detectCode } from './code';
 import { insertMessage } from './db';
+import { detectActionLink } from './link';
 import type { AttachmentMeta, Env } from './types';
 import { newMessageId, normalizeMailbox } from './util';
 
@@ -51,6 +52,10 @@ export async function handleEmail(message: ForwardableEmailMessage, env: Env, ct
 
   let html: string | null = parsed.html ?? null;
   let htmlR2Key: string | null = null;
+  const text = parsed.text ? parsed.text.slice(0, MAX_TEXT_BODY) : null;
+  const code = detectCode(parsed.subject ?? null, text);
+  // 点开才能拿到验证码的按钮（Netflix「取得存取码」、Disney+「是我本人」）：在正文落 R2 之前先识别
+  const link = detectActionLink(parsed.subject ?? null, text, html);
   if (html && html.length > MAX_INLINE_BODY) {
     htmlR2Key = bodyKey(id);
     await env.ATTACHMENTS.put(htmlR2Key, html, {
@@ -58,8 +63,6 @@ export async function handleEmail(message: ForwardableEmailMessage, env: Env, ct
     });
     html = null;
   }
-  const text = parsed.text ? parsed.text.slice(0, MAX_TEXT_BODY) : null;
-  const code = detectCode(parsed.subject ?? null, text);
 
   await insertMessage(env.DB, {
     id,
@@ -74,7 +77,8 @@ export async function handleEmail(message: ForwardableEmailMessage, env: Env, ct
     size: raw.byteLength,
     attachments_json: JSON.stringify(metas),
     code,
-    category: classify(parsed.subject ?? null, text, code !== null),
+    link,
+    category: classify(parsed.subject ?? null, text, code !== null || link !== null),
   });
 
   // 可选：同时转发一份到真实邮箱（目标必须在 Email Routing 里验证过）

@@ -5,8 +5,9 @@
  * 避免把订单号、年份、普通数字当成验证码展示。
  */
 
-const KEYWORD =
-  /(验证码|校验码|动态码|确认码|一次性|驗證碼|認証コード|인증|verification|verify|one[- ]time|passcode|security code|login code|sign[- ]?in code|access code|\bcode\b|\botp\b|\bpin\b)/i;
+/** “这封邮件在说验证码”的用词；src/link.ts 也用它判断主题是否像验证码邮件 */
+export const KEYWORD =
+  /(验证码|校验码|动态码|确认码|一次性|驗證碼|存取碼|存取码|認証コード|인증|verification|verify|one[- ]time|passcode|security code|login code|sign[- ]?in code|access code|\bcode\b|\botp\b|\bpin\b)/i;
 
 /** 4～8 位数字，或 3+3 中间带空格/连字符；前后不能紧挨着数字或连字符（排除长串号码的一部分） */
 const CANDIDATE = /(?<![\d-])(\d{3}[ -]\d{3}|\d{4,8})(?![\d-])/g;

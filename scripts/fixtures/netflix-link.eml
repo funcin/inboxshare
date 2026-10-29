@@ -1,0 +1,59 @@
+From: "Netflix" <info@account.netflix.example>
+To: share@example.com
+Subject: =?UTF-8?B?5oKo55qEIE5ldGZsaXgg5pqr5pmC5a2Y5Y+W56K8?=
+Date: Mon, 19 Oct 2026 16:22:00 +0800
+Message-ID: <netflix-link-1@account.netflix.example>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="ALT"
+
+--ALT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+您的暫時存取碼
+
+111，您好：
+
+我們收到下列裝置的暫時存取碼申請。
+
+如果是您或同住者提出申請，即可取得收看影片用的暫時存取碼。
+
+此代碼僅限旅行用或在 Netflix 同戶裝置以外的裝置暫時使用，請勿傳給其他人。
+
+111於10月19日上午12:22 (香港時間)透過 Realme - Android 手機 提出申請
+
+取得存取碼
+https://www.netflix.com/account/travel/verify?nftoken=TEST-TOKEN-123
+
+* 連結將於 15 分鐘後失效。
+
+維護帳戶安全：如果不知道此人是誰，建議您立即登出不認得的裝置，您也可以更改密碼。
+
+我們樂意提供協助
+取消訂閱 https://www.netflix.com/unsubscribe?x=1
+
+--ALT
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html><body style="font-family:Helvetica,Arial;margin:0;padding:24px;background:#f3f3f3">
+<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center">
+<table width="520" cellpadding="0" cellspacing="0" style="background:#fff;padding:24px">
+<tr><td><a href="https://www.netflix.com/" target="_blank"><img src="https://assets.nflxext.com/logo.png" alt="Netflix" width="80"></a></td></tr>
+<tr><td style="padding-top:24px;font-size:28px;font-weight:700">您的暫時存取碼</td></tr>
+<tr><td style="padding-top:16px;font-size:16px;line-height:1.6">111，您好：<br><br>我們收到下列裝置的暫時存取碼申請。<br><br>如果是您或同住者提出申請，即可取得收看影片用的暫時存取碼。<br><br>此代碼僅限旅行用或在 Netflix 同戶裝置以外的裝置暫時使用，請勿傳給其他人。</td></tr>
+<tr><td style="padding-top:16px">
+  <table width="100%" cellpadding="16" style="border:1px solid #ddd;border-radius:8px">
+    <tr><td style="font-size:15px">111於10月19日上午12:22 (香港時間)透過 <b>Realme - Android 手機</b> 提出申請</td></tr>
+    <tr><td align="center"><a href="https://www.netflix.com/account/travel/verify?nftoken=TEST-TOKEN-123&amp;lnktrk=EVO" target="_blank" style="display:block;background:#e50914;color:#fff;text-decoration:none;padding:14px 24px;border-radius:4px;font-weight:700">取得存取碼</a></td></tr>
+    <tr><td style="font-size:12px;color:#666">* 連結將於 15 分鐘後失效。</td></tr>
+  </table>
+</td></tr>
+<tr><td style="padding-top:16px;font-size:13px;color:#333"><b>維護帳戶安全：</b>如果不知道此人是誰，建議您立即<a href="https://www.netflix.com/manageDevices">登出不認得的裝置</a>，您也可以<a href="https://www.netflix.com/password">更改密碼</a>。</td></tr>
+<tr><td style="padding-top:16px;font-size:13px">我們樂意提供協助 <a href="https://help.netflix.com/zh-tw">說明中心</a></td></tr>
+<tr><td style="padding-top:16px;font-size:11px;color:#888"><a href="https://www.netflix.com/unsubscribe?x=1">取消訂閱</a> · <a href="https://www.netflix.com/privacy">隱私權</a></td></tr>
+</table>
+</td></tr></table>
+</body></html>
+
+--ALT--

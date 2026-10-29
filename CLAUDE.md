@@ -3,7 +3,7 @@
 ## 是什么
 
 自有域名下某个邮箱地址的**只读共享收件箱**：Cloudflare Email Routing 把该地址的来信投给本 Worker，
-Worker 解析、识别验证码、分类后把元数据/正文存 D1、附件存 R2，管理员生成 `/s/<key>` 链接（key = 邮箱用户名 + 序号字母 + 10 位随机尾巴，随机尾巴是唯一的访问控制；备注只在管理页显示，不进 key），访客只能在
+Worker 解析、识别验证码（`src/code.ts`）和「点开才拿到码」的操作链接（`src/link.ts`：Netflix「取得存取码」、Claude Console「Sign in」魔法链接、Disney+「是我本人」）、分类后把元数据/正文存 D1、附件存 R2，管理员生成 `/s/<key>` 链接（key = 邮箱用户名 + 序号字母 + 10 位随机尾巴，随机尾巴是唯一的访问控制；备注只在管理页显示，不进 key），访客只能在
 链接设定的滚动时间窗口内（30 分钟 … 7 天 / 不限）只读查看邮件与下载附件。典型用途：把主邮箱里的验证码邮件
 转发到这里，让家人或同事自助看验证码。
 
@@ -40,10 +40,11 @@ Worker 解析、识别验证码、分类后把元数据/正文存 D1、附件存
 
 ```bash
 pnpm typecheck                 # tsc --noEmit
-pnpm test:classify             # 验证码识别 + 邮件分类用例
+pnpm test:classify             # 验证码识别 + 操作链接识别 + 邮件分类用例
 pnpm db:migrate:local          # 本地 D1 建表
 pnpm dev                       # http://127.0.0.1:8787
-pnpm test:email                # 向本地投递 scripts/fixtures/sample.eml
+pnpm test:email                # 向本地投递 scripts/fixtures/sample.eml（带码）；
+                               # 第二个参数可换 netflix-link.eml / claude-console.eml（只有链接）
 ```
 投递后用 `/admin`（令牌在 `.dev.vars`）建链接，打开 `/s/<key>` 在桌面和手机视口真实渲染验证；改了文案要分别用
 `pnpm dev --var LOCALE:en` 看英文版。

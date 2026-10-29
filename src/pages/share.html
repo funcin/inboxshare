@@ -99,9 +99,15 @@
   .codebox .label { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--is-accent-text); }
   .codebox .code { font-size: 40px; font-weight: 600; letter-spacing: 0.2em; line-height: 1.15; }
   .codebox .sub { font-size: 13px; color: var(--is-muted); }
-  .primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 24px; border: 0; border-radius: 10px; background: var(--is-accent); color: #fff; font-size: 15px; font-weight: 600; }
+  /* 操作链接卡（Netflix「取得存取码」、Claude Console「Sign in」这类点开才拿到码的按钮）：显示域名 + 打开/复制 */
+  .codebox + .codebox { margin-top: 12px; }
+  .codebox .host { font-size: 18px; font-weight: 600; overflow-wrap: anywhere; }
+  .codebox .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 24px; border: 0; border-radius: 10px; background: var(--is-accent); color: #fff; font-size: 15px; font-weight: 600; text-decoration: none; }
   .primary:hover { background: var(--is-accent-hover); }
   .primary:active { background: var(--is-accent-hover); transform: translateY(1px); }
+  .ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 18px; border: 1px solid var(--is-line-strong); border-radius: 10px; background: var(--is-surface); color: var(--is-ink); font-size: 15px; font-weight: 600; }
+  .ghost:hover { border-color: var(--is-ink); }
   @media (prefers-reduced-motion: reduce) { .primary:active { transform: none; } }
   .frame-wrap { margin: 24px 28px 28px; border: 1px solid var(--is-line); border-radius: 10px; overflow: hidden; background: var(--is-frame-bg); flex: 1; display: flex; flex-direction: column; }
   iframe { flex: 1; width: 100%; min-height: 55vh; border: 0; background: #fff; }
@@ -138,6 +144,7 @@
     .latest .lrow .label { font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--is-accent-text); }
     .latest .lrow span:last-child { color: var(--is-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .latest .code { font-size: 36px; font-weight: 600; letter-spacing: 0.2em; text-align: center; line-height: 1.2; }
+    .latest .host { font-size: 18px; font-weight: 600; text-align: center; overflow-wrap: anywhere; }
     .latest .primary { width: 100%; }
     .list-head { padding: 12px 16px; }
     .items { max-height: none; overflow: visible; }
@@ -157,6 +164,7 @@
     .codebox { margin: 12px 12px 0; flex-direction: column; align-items: stretch; text-align: center; padding: 18px 16px; }
     .codebox .col { flex-basis: auto; }
     .codebox .code { font-size: 36px; }
+    .codebox .actions { flex-direction: column; align-items: stretch; }
     .frame-wrap { margin: 12px; }
     iframe { min-height: 0; height: calc(100dvh - 320px); min-height: 320px; }
     pre.text { padding: 16px; }
@@ -189,9 +197,11 @@
 
 <main id="layout">
   <section class="latest hidden" id="latest" aria-label="{{latestCode}}">
-    <div class="lrow"><span class="label">{{latestCode}}</span><span id="latest-meta"></span></div>
+    <div class="lrow"><span class="label" id="latest-label">{{latestCode}}</span><span id="latest-meta"></span></div>
     <div class="code mono" id="latest-code"></div>
+    <div class="host mono hidden" id="latest-host"></div>
     <button type="button" class="primary" id="latest-copy"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg><span id="latest-copy-label">{{copyCode}}</span></button>
+    <a class="primary hidden" id="latest-open" href="#" target="_blank" rel="noopener noreferrer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><path d="M15 3h6v6"></path><path d="M10 14L21 3"></path></svg>{{openLink}}</a>
   </section>
 
   <section class="card list" aria-label="{{inbox}}">
@@ -225,6 +235,17 @@
       </div>
       <button type="button" class="primary" id="copy-code"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg><span id="copy-code-label">{{copyCode}}</span></button>
     </div>
+    <div class="codebox hidden" id="linkbox">
+      <div class="col">
+        <span class="label">{{linkDetected}}</span>
+        <span class="host mono" id="d-link-host"></span>
+        <span class="sub">{{linkHint}}</span>
+      </div>
+      <div class="actions">
+        <a class="primary" id="open-link" href="#" target="_blank" rel="noopener noreferrer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><path d="M15 3h6v6"></path><path d="M10 14L21 3"></path></svg>{{openLink}}</a>
+        <button type="button" class="ghost" id="copy-link"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg><span id="copy-link-label">{{copyLink}}</span></button>
+      </div>
+    </div>
     <div class="frame-wrap hidden" id="frame-wrap"><iframe id="frame" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" title="{{title}}"></iframe></div>
     <pre class="text hidden" id="text"></pre>
     <div class="atts hidden" id="atts"></div>
@@ -249,6 +270,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var current = null;
   var currentCode = null;
+  var currentLink = null;
   var latestCode = null;
   var countText = '';
 
@@ -262,6 +284,9 @@
   function fmt(tpl, vars) { return tpl.replace(/\{(\w+)\}/g, function (_, k) { return vars[k] != null ? vars[k] : ''; }); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function spoken(code) { return String(code).split('').join(' '); }
+  function hostOf(u) { try { return new URL(u).host.replace(/^www\./, ''); } catch (e) { return ''; } }
+  // 列表标签：有验证码显示码，只有操作链接显示“点击验证”
+  function chipText(m) { return m.code || (m.link ? T.linkChip : ''); }
 
   function windowLabel(m) {
     if (!m) return T.windowAll;
@@ -349,15 +374,27 @@
     $('window').classList.add('hidden');
   }
 
+  // 手机顶部卡片：最新一封带验证码或操作链接的邮件。有码就大字 + 复制；只有链接就显示域名 + 打开按钮
   function renderLatest(items) {
     var m = null;
-    for (var i = 0; i < items.length; i++) { if (items[i].code) { m = items[i]; break; } }
+    for (var i = 0; i < items.length; i++) { if (items[i].code || items[i].link) { m = items[i]; break; } }
     latestCode = m ? m.code : null;
     $('latest').classList.toggle('hidden', !m);
     if (!m) return;
+    var hasCode = !!m.code;
+    $('latest-label').textContent = hasCode ? T.latestCode : T.latestLink;
     $('latest-meta').textContent = senderName(m.from) + ' · ' + fmtRelative(m.receivedAt);
-    $('latest-code').textContent = m.code;
-    $('latest-code').setAttribute('aria-label', spoken(m.code));
+    $('latest-code').classList.toggle('hidden', !hasCode);
+    $('latest-copy').classList.toggle('hidden', !hasCode);
+    $('latest-host').classList.toggle('hidden', hasCode);
+    $('latest-open').classList.toggle('hidden', hasCode);
+    if (hasCode) {
+      $('latest-code').textContent = m.code;
+      $('latest-code').setAttribute('aria-label', spoken(m.code));
+    } else {
+      $('latest-host').textContent = hostOf(m.link);
+      $('latest-open').href = m.link;
+    }
   }
 
   function render(data) {
@@ -380,13 +417,14 @@
       li.setAttribute('role', 'button');
       li.setAttribute('tabindex', '0');
       if (current === m.id) li.classList.add('active');
-      var third = m.code
-        ? '<div class="coderow"><span class="chip-code mono">' + esc(m.code) + '</span><span class="snippet">' + esc(m.snippet || '') + '</span></div>'
+      var chip = chipText(m);
+      var third = chip
+        ? '<div class="coderow"><span class="chip-code mono">' + esc(chip) + '</span><span class="snippet">' + esc(m.snippet || '') + '</span></div>'
         : '<div class="snippet only">' + esc(m.snippet || '') + '</div>';
-      li.innerHTML = '<div class="avatar' + (m.code ? ' code' : '') + '" aria-hidden="true">' + esc(initial(m.from)) + '</div>'
+      li.innerHTML = '<div class="avatar' + (chip ? ' code' : '') + '" aria-hidden="true">' + esc(initial(m.from)) + '</div>'
         + '<div class="body"><div class="row1"><span class="from">' + esc(senderName(m.from)) + '</span><span class="time" title="' + esc(fmtFull(m.receivedAt)) + '">' + esc(fmtRelative(m.receivedAt)) + '</span></div>'
         + '<div class="subject">' + esc(m.subject || T.noSubject) + (m.attachmentCount ? ' 📎' : '') + '</div>' + third + '</div>'
-        + (m.code ? '<span class="chip-side mono" aria-hidden="true">' + esc(m.code) + '</span>' : '');
+        + (chip ? '<span class="chip-side mono" aria-hidden="true">' + esc(chip) + '</span>' : '');
       li.addEventListener('click', function () { open(m.id); });
       li.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(m.id); } });
       ul.appendChild(li);
@@ -425,12 +463,12 @@
   }
 
   function open(id) {
-    current = id; currentCode = null;
+    current = id; currentCode = null; currentLink = null;
     document.querySelectorAll('#items li').forEach(function (li) { li.classList.toggle('active', li.dataset.id === id); });
     openDetailPane();
     $('placeholder').textContent = T.loadingMsg;
     $('placeholder').classList.remove('hidden');
-    ['detail-meta', 'codebox', 'frame-wrap', 'text', 'atts'].forEach(function (i) { $(i).classList.add('hidden'); });
+    ['detail-meta', 'codebox', 'linkbox', 'frame-wrap', 'text', 'atts'].forEach(function (i) { $(i).classList.add('hidden'); });
     fetch(api + '/messages/' + encodeURIComponent(id), { cache: 'no-store' }).then(function (r) {
       if (!r.ok) throw new Error(String(r.status));
       return r.json();
@@ -440,7 +478,7 @@
       $('detail-meta').classList.remove('hidden');
       $('d-subject').textContent = m.subject || T.noSubject;
       $('d-avatar').textContent = initial(m.from);
-      $('d-avatar').classList.toggle('code', !!m.code);
+      $('d-avatar').classList.toggle('code', !!(m.code || m.link));
       $('d-name').textContent = (m.from && m.from.name) || (m.from && m.from.address) || T.unknownSender;
       $('d-addr').textContent = (m.from && m.from.name && m.from.address) ? m.from.address : '';
       $('d-to').textContent = m.mailbox;
@@ -452,6 +490,13 @@
         $('d-code-sub').textContent = fmt(T.receivedAgo, { t: fmtRelative(m.receivedAt) });
         $('copy-code-label').textContent = T.copyCode;
         $('codebox').classList.remove('hidden');
+      }
+      if (m.link) {
+        currentLink = m.link;
+        $('d-link-host').textContent = hostOf(m.link);
+        $('open-link').href = m.link;
+        $('copy-link-label').textContent = T.copyLink;
+        $('linkbox').classList.remove('hidden');
       }
       if (m.html) {
         mountFrame(sanitize(m.html));
@@ -488,6 +533,7 @@
     if (t && t !== '—') copyText(t, 'copy-label', T.copied, T.copyAddress);
   });
   $('copy-code').addEventListener('click', function () { copyText(currentCode, 'copy-code-label', T.codeCopied, T.copyCode); });
+  $('copy-link').addEventListener('click', function () { copyText(currentLink, 'copy-link-label', T.linkCopied, T.copyLink); });
   $('latest-copy').addEventListener('click', function () { copyText(latestCode, 'latest-copy-label', T.codeCopied, T.copyCode); });
   load();
   setInterval(load, 30000);

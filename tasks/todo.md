@@ -77,3 +77,11 @@
 - 2026-10-28 开源前整改完成：敏感邮件分类与隔离（迁移 0003，链接 show_sensitive）、Deploy 按钮 + fork 即部署 Actions + `pnpm run deploy`、wrangler.jsonc 顶层通用化（作者实例移到 env.production）、README/CLAUDE.md 换品牌 InboxShare。代码推到 `funcin/inboxshare`（站长已建）。
 - 2026-10-28 站长把 Worker 从 `emailshare` 改名为 `inboxshare`（密钥、D1、R2、mail.funcin.de 均保留），wrangler.jsonc 的 name 同步改为 `inboxshare`。
 - 2026-10-28 Workers Builds 已从 `funcin/inboxshare` 成功部署（绑定、密钥、域名、数据均保留）；旧仓库 `funcin/emailshare` 已归档，本地 old 远端已删。域名 inboxshare.app 已注册并接入 Cloudflare（2026-10-28），已加为正式入口，PUBLIC_BASE_URL 切换；mail.funcin.de 保留给旧链接。
+
+2026-10-29 分享页支持「点开才拿到验证码」的邮件（Netflix 暂时存取码「取得存取碼」按钮、Claude Console「Sign in」魔法链接、Disney+「是我本人」）：
+  - 新增 `src/link.ts` `detectActionLink(subject, text, html)`，入库时和验证码一起识别（迁移 0005 加 `messages.link`）。HTML 优先：锚文本（含 img alt / title）命中强关键词（取得存取码 / get code / verify / 是我本人…）直接入选，弱关键词（sign in / 登录 / 确认）只在主题像验证码或登录链接邮件时算数；没 HTML 时退回纯文本，按 URL 前最近两行逐行打分（不能整段打分，Netflix 前文有“裝置”会连坐）。退订 / 帮助 / 隐私 / 登出 / 改密码类按锚文本、路径、域名三层排除；域名排除要精确匹配（`x\.com` 子串曾误伤 netflix.com）。
+  - 分类：识别出码或链接的邮件只看主题 + 正文前 300 字判敏感；Netflix 英文版结尾的 "sign out of unrecognized devices / change your password" 原本会把它判成 reset/security 藏掉。主题命中重置密码的仍隐藏。`KEYWORD` 加「存取碼 / 存取码」并导出。
+  - 分享页：列表标签「点击验证 / Tap to verify」，详情多一张链接卡（域名 + 「打开验证链接」新标签页 + 「复制链接」），手机顶部卡片对只有链接的邮件显示「最新验证链接」+ 打开按钮；有码仍按原样。文案在 `src/i18n.ts`（linkDetected / linkHint / openLink / copyLink / linkCopied / linkChip / latestLink）。正文 iframe 里的按钮本来就能点（sandbox allow-popups），这次只是不用再去正文里找。
+  - 用例：`pnpm test:classify` 加 8 条链接用例（Netflix 繁中 HTML/纯文本、Netflix 英文、Console HTML/纯文本、Disney+ 图片按钮、新闻邮件 Log in 不算、只有退订链接不算）+ 5 条分类用例；fixtures 加 `netflix-link.eml`、`claude-console.eml`。tsconfig 开 `allowImportingTsExtensions`（link.ts 要 import './code.ts' 让 node --experimental-strip-types 直接跑）。
+  - 验证：typecheck、test:classify 全过；本地 wrangler dev 投递三封后用 Playwright（有头 Chrome）在 1440 / 390、中 / 英四组真实渲染：标签、链接卡、顶部卡、打开按钮弹出正确 URL（opener 为 null）、复制到剪贴板一致、iframe 内按钮弹窗、有码邮件链接卡隐藏、无横向溢出、无控制台错误。
+  - 教训：Playwright 在同一页面已经开过一次弹窗之后，收不到 sandbox iframe 再开的 popup 事件（无头/有头都有，与 Chrome 无关：keep 住第一个弹窗或先测 iframe 就正常），验证脚本要把 iframe 点击放在最前面。Chrome 扩展这次未连接，没法用真实 Chrome 复核。

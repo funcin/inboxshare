@@ -55,6 +55,13 @@ const zhCN = {
   hiddenShort: '{n} 封敏感邮件未显示。',
   langEn: 'EN',
   langZh: '中文',
+  linkDetected: '检测到验证链接',
+  linkHint: '验证码或登录确认在对方网站上显示。这类链接通常只能用一次，几分钟内失效。',
+  openLink: '打开验证链接',
+  copyLink: '复制链接',
+  linkCopied: '已复制链接',
+  linkChip: '点击验证',
+  latestLink: '最新验证链接',
 };
 
 const en: typeof zhCN = {
@@ -103,6 +110,13 @@ const en: typeof zhCN = {
   hiddenShort: '{n} sensitive messages hidden.',
   langEn: 'EN',
   langZh: '中文',
+  linkDetected: 'Verification link detected',
+  linkHint: "The code or sign-in confirmation is shown on the sender's site. Links like this usually work once and expire within minutes.",
+  openLink: 'Open verification link',
+  copyLink: 'Copy link',
+  linkCopied: 'Link copied',
+  linkChip: 'Tap to verify',
+  latestLink: 'Latest verification link',
 };
 
 export type Dict = typeof zhCN;

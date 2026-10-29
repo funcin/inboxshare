@@ -1,0 +1,35 @@
+From: "Claude Console" <no-reply@console.anthropic.example>
+To: share@example.com
+Subject: Your secure link to the Claude Console is here
+Date: Fri, 24 Oct 2026 14:58:44 +0800
+Message-ID: <console-link-1@console.anthropic.example>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="ALT"
+
+--ALT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+Sign in to Claude Console
+
+Click the button below to finish signing in. This link expires in 10 minutes.
+
+Sign in: https://console.anthropic.com/magic-link?token=TEST-TOKEN-456
+
+If you didn't request this email, you can safely ignore it.
+Need a hand? Contact Anthropic Support https://support.anthropic.com/
+
+--ALT
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 8bit
+
+<html><body style="font-family:Helvetica,Arial;margin:0;padding:40px;text-align:center">
+<p><img src="https://console.anthropic.example/logo.png" alt="Claude Console" width="160"></p>
+<h1 style="font-size:32px;margin:40px 0 16px">Sign in to Claude Console</h1>
+<p style="font-size:18px;color:#333;max-width:520px;margin:0 auto 32px">Click the button below to finish signing in. This link expires in 10 minutes.</p>
+<p><a href="https://console.anthropic.com/magic-link?token=TEST-TOKEN-456" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:16px 56px;border-radius:8px;font-size:20px;font-weight:700">Sign in</a></p>
+<p style="color:#777;margin-top:48px">If you didn't request this email, you can safely ignore it.</p>
+<p style="color:#777">Need a hand? Contact <a href="https://support.anthropic.com/">Anthropic Support</a>.</p>
+</body></html>
+
+--ALT--

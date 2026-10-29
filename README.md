@@ -44,12 +44,12 @@ verification email  →   one forwarding rule  →  Cloudflare Email     →  fi
 ### How it works
 
 1. **Forward only the verification emails.** In Gmail or Outlook, add one rule: mail from Netflix, Disney+, HBO Max, OpenAI or Anthropic goes to `code@yourdomain.com`. Everything else stays where it is.
-2. **InboxShare picks out the code.** Cloudflare Email Routing hands each message to the Worker the moment it arrives. The 4 to 8 digit code is detected and shown with a copy button; confirmation buttons in HTML mail still work. Password resets, receipts and account-security alerts are classified and hidden by default.
+2. **InboxShare picks out the code, or the button.** Cloudflare Email Routing hands each message to the Worker the moment it arrives. A 4 to 8 digit code is detected and shown with a copy button. When the email carries a button instead of a code (Netflix's "Get code", the Claude Console "Sign in" magic link, Disney+'s "Yes, this was me"), that link is detected too and shown as an "Open verification link" button with a copy button next to it. Password resets, receipts and account-security alerts are classified and hidden by default.
 3. **Send one link.** In the admin page, create a read-only link for that address with a rolling time window (last 30 minutes, 1 hour, 6 hours, 1 day, 7 days, or all retained mail). Pin it in the family chat. Revoke or delete it whenever you like.
 
 ### What viewers see
 
-A mobile-friendly inbox for that one address: sender, subject, relative time, the code as a chip in the list and as a large copy button in the message, the sanitized HTML body in a sandboxed frame, and attachments as downloads. On phones the newest code sits in a card at the top. The page refreshes every 30 seconds.
+A mobile-friendly inbox for that one address: sender, subject, relative time, the code as a chip in the list and as a large copy button in the message, the sanitized HTML body in a sandboxed frame, and attachments as downloads. Emails whose code is behind a button show a "Tap to verify" chip and an "Open verification link" button instead; links in the body open in a new tab as well. On phones the newest code or link sits in a card at the top. The page refreshes every 30 seconds.
 
 ### What InboxShare does not do
 
@@ -64,6 +64,7 @@ A mobile-friendly inbox for that one address: sender, subject, relative time, th
 | --- | --- |
 | Read-only share links | `/s/<key>` pages; viewers cannot send, reply or delete. Keys are `<mailbox user><letter><10 random characters>`; the random tail is the access control. |
 | Code detection | 4 to 8 digit verification codes detected on arrival; conservative rules avoid years and order numbers. |
+| Verification-link detection | "Get code", "Sign in" and "Yes, this was me" buttons are detected on arrival and shown as an open / copy button; unsubscribe, help and sign-out links are ignored. |
 | Rolling time windows | Each link shows only recent mail; old codes scroll out on their own. |
 | Expiry, revoke, delete | Optional expiry date, instant revoke (record kept) or delete (record removed). |
 | Sensitive-mail isolation | Password reset, billing and account-security emails never appear unless a link explicitly opts in. |
