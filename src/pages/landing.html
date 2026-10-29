@@ -200,7 +200,8 @@
     .nav { gap: 16px; }
     .nav nav { display: none; }
     .hero { padding-top: 48px; padding-bottom: 56px; gap: 40px; }
-    h1 { font-size: clamp(38px, 10vw, 48px); }
+    /* 9vw：390px 宽时 35px，中文标题每行正好放下 10 个字（“换设备登录，无干扰，”），不会在词中间断行 */
+    h1 { font-size: clamp(34px, 9vw, 48px); }
     .lead { font-size: 17px; }
     section.band > .wrap { padding-top: 56px; padding-bottom: 56px; }
     h2.t { margin-bottom: 32px; }
